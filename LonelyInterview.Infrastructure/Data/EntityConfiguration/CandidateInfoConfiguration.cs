@@ -17,6 +17,10 @@ internal class CandidateInfoConfiguration : IEntityTypeConfiguration<CandidateIn
             .HasKey(x => x.Id);
 
         builder
+            .Property(t => t.Id)
+            .ValueGeneratedNever();
+
+        builder
             .HasOne(t => t.Candidate)
             .WithOne(t => t.Info)
             .HasForeignKey<Candidate>()

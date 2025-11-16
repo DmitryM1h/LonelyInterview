@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36603.0 d17.14
+VisualStudioVersion = 17.14.36603.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LonelyInterview", "LonelyInterview\LonelyInterview.csproj", "{2A568949-330C-483A-A94D-EAF655703464}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LonelyInterview.Domain", "LonelyInterview.Domain\LonelyInterview.Domain.csproj", "{EC9318F9-A297-4738-B6B6-3B53379A7BDD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LonelyInterview.Infrastructure", "LonelyInterview.Infrastructure\LonelyInterview.Infrastructure.csproj", "{C5297F1F-BC15-4FE9-94B3-139621A22AA5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LonelyInterview.Auth", "LonelyInterview.Auth\LonelyInterview.Auth.csproj", "{AB77F37F-F8A6-4641-BEEE-9E8F1DEEE6FA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{C5297F1F-BC15-4FE9-94B3-139621A22AA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5297F1F-BC15-4FE9-94B3-139621A22AA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5297F1F-BC15-4FE9-94B3-139621A22AA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB77F37F-F8A6-4641-BEEE-9E8F1DEEE6FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB77F37F-F8A6-4641-BEEE-9E8F1DEEE6FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB77F37F-F8A6-4641-BEEE-9E8F1DEEE6FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB77F37F-F8A6-4641-BEEE-9E8F1DEEE6FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

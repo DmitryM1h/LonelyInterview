@@ -1,12 +1,14 @@
 ﻿using LonelyInterview.Domain.Interfaces;
 using System;
+using System.ComponentModel;
 
 
 namespace LonelyInterview.Domain.Entities;
 
+
 public class Candidate : IEntity
 {
-    public Guid Id { get; init; }
+    public Guid Id { get; private set; }
 
 
     private List<Resume> _resumes = new List<Resume>();
@@ -28,5 +30,13 @@ public class Candidate : IEntity
     }
 
     private Candidate() { }
+
+    public static Candidate CreateCandidate(Guid id, CandidateInfo? info)
+    {
+        var candidate = new Candidate() { Id = id};
+        if (info is not null)
+            candidate.AddInfo(info);
+        return candidate;
+    }
 
 }

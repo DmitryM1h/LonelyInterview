@@ -9,4 +9,6 @@ namespace LonelyInterview.Domain.Repository;
 public interface IUnitOfWork
 {
     Task SaveAsync(CancellationToken cancellationToken);
+
+    Task BeginTransactionAsync(CancellationToken cancellationToken);
 }

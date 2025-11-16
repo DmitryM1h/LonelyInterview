@@ -1,4 +1,5 @@
 ﻿using LonelyInterview.Domain.Entities;
+using LonelyInterview.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,6 +11,10 @@ internal class CandidateConfiguration : IEntityTypeConfiguration<Candidate>
     {
         builder
             .HasKey(x => x.Id);
+
+        builder
+            .Property(e => e.Id)
+            .ValueGeneratedNever();
 
         builder
             .HasMany(x => x.Resumes)

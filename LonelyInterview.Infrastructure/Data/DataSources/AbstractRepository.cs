@@ -17,19 +17,20 @@ public abstract class AbstractRepository<TEntity, TId> : IRepository<TEntity, TI
         _dbSet = context.Set<TEntity>();
     }
 
-    public virtual async Task<TEntity?> GetByIdOrDefault(TId id, CancellationToken token = default)
+    public virtual async Task<TEntity?> GetByIdOrDefaultAsync(TId id, CancellationToken token = default)
     {
         return await _dbSet.FindAsync(id, token);
     }
 
-    public virtual async Task<IEnumerable<TEntity>> GetAll(CancellationToken token = default)
+    public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken token = default)
     {
         return await _dbSet.ToListAsync(token);
     }
 
-    public virtual async Task Add(TEntity entity, CancellationToken token = default)
+    public virtual Task AddAsync(TEntity entity, CancellationToken token = default)
     {
-        await _dbSet.AddAsync(entity, token);
+         _dbSet.Add(entity);
+        return Task.CompletedTask;
     }
 
     public virtual void Update(TEntity entity)

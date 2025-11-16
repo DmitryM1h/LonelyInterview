@@ -29,7 +29,24 @@ public static class ConfigureDatabase
 
     public static IServiceCollection AddDataSources(this IServiceCollection services) =>
         services
-        .AddScoped<IRepository<Candidate, Guid>, CandidateDataSource>()
-        .AddScoped<IRepository<HrManager, Guid>, HrManagerDataSource>();
-        
+        .AddScoped<CandidateDataSource>()
+        .AddScoped<HrManagerDataSource>()
+        .AddScoped<UnitOfWork>();
+
+
+
+    public static IServiceCollection AddDatabaseUserContext(this IServiceCollection services, IConfiguration _configuration)
+    {
+        return services.AddDbContextPool<ApplicationUserContext>(options =>
+        {
+            options.UseNpgsql(_configuration["ConnectionStrings:default"], opts =>
+            {
+                opts.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+                opts.MigrationsHistoryTable(HistoryRepository.DefaultTableName, "Auth");
+            });
+
+        });
+
+    }
+
 }

@@ -39,4 +39,47 @@ public class CandidateInfo : IEntity
         };
     }
 
+    public static CandidateInfo Create(string? specialty, string? degree, int? graduationYear, string? workExperience)
+    {
+        int? validatedGraduationYear = null;
+
+        if (graduationYear >= 1900 && graduationYear <= DateTime.Now.Year + 5)
+        {
+            validatedGraduationYear = graduationYear;
+        }
+        else
+        {
+            throw new ArgumentException($"Graduation year must be between 1900 and {DateTime.Now.Year + 5}");
+        }
+
+
+        return new CandidateInfo
+        {
+            Specialty = string.IsNullOrWhiteSpace(specialty) ? null : specialty.Trim(),
+            Degree = string.IsNullOrWhiteSpace(degree) ? null : degree.Trim(),
+            GraduationYear = validatedGraduationYear,
+            WorkExperience = string.IsNullOrWhiteSpace(workExperience) ? null : workExperience.Trim()
+        };
+    }
+
+    public void Update(string? specialty, string? degree, int? graduationYear, string? workExperience)
+    {
+        int? validatedGraduationYear = null;
+        if (graduationYear.HasValue)
+        {
+            if (graduationYear >= 1900 && graduationYear <= DateTime.Now.Year + 5)
+            {
+                validatedGraduationYear = graduationYear;
+            }
+            else
+            {
+                throw new ArgumentException($"Graduation year must be between 1900 and {DateTime.Now.Year + 5}");
+            }
+        }
+
+        Specialty = string.IsNullOrWhiteSpace(specialty) ? null : specialty.Trim();
+        Degree = string.IsNullOrWhiteSpace(degree) ? null : degree.Trim();
+        GraduationYear = validatedGraduationYear;
+        WorkExperience = string.IsNullOrWhiteSpace(workExperience) ? null : workExperience.Trim();
+    }
 }

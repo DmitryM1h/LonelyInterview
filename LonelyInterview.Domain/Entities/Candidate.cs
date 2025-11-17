@@ -26,7 +26,25 @@ public class Candidate : IEntity
     public void AddInfo(CandidateInfo info)
     {
         // TODO валидация
-        Info = info;
+        if (Info is null)
+        {
+            Info = info;
+        }
+
+    }
+
+    public void UpdateInfo(CandidateInfo info)
+    {
+
+        if (Info is null)
+        {
+            var candInfo = CandidateInfo.Create(info.Id, info.Specialty, info.Degree, info.GraduationYear, info.WorkExperience);
+            Info = candInfo;
+            return;
+        }
+
+        Info.Update(info.Specialty, info.Degree, info.GraduationYear, info.WorkExperience);
+
     }
 
     private Candidate() { }

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace LonelyInterview.Infrastructure.Data.DataSources;
 
-public class UnitOfWork(LonelyInterviewContext _dbContext)
+public class LonelyInterviewUnitOfWork(LonelyInterviewContext _dbContext)
 {
    // private IDbContextTransaction? _currentTransaction;
 

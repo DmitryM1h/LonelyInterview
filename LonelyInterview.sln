@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LonelyInterview.Infrastruct
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LonelyInterview.Auth", "LonelyInterview.Auth\LonelyInterview.Auth.csproj", "{AB77F37F-F8A6-4641-BEEE-9E8F1DEEE6FA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LonelyInterview.Application", "LonelyInterview.Application\LonelyInterview.Application.csproj", "{21BE0D9E-B22C-4EE9-8903-E711C58FEA88}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{AB77F37F-F8A6-4641-BEEE-9E8F1DEEE6FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB77F37F-F8A6-4641-BEEE-9E8F1DEEE6FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB77F37F-F8A6-4641-BEEE-9E8F1DEEE6FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21BE0D9E-B22C-4EE9-8903-E711C58FEA88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21BE0D9E-B22C-4EE9-8903-E711C58FEA88}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21BE0D9E-B22C-4EE9-8903-E711C58FEA88}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21BE0D9E-B22C-4EE9-8903-E711C58FEA88}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

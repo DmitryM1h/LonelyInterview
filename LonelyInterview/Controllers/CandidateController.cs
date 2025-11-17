@@ -11,15 +11,10 @@ namespace LonelyInterview.Controllers
     {
 
         [HttpGet]
-        public async Task<IEnumerable<Candidate>> GetAllCandidates()
+        public async Task<ActionResult<IEnumerable<Candidate>>> GetAllCandidates()
         {
-           return await _candidateDatasource.GetAllAsync();
+           var candidates = await _candidateDatasource.GetAllAsync();
+            return Ok(candidates);
         }
-
-
-
-      
-
-
     }
 }

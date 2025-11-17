@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -7,10 +8,12 @@ namespace LonelyInterview.Auth
 {
     public static class AuthConfiguration
     {
-        public static void AddAuth(this IServiceCollection services)
+        public static void AddAuth(this IServiceCollection services, IConfiguration configuration)
         {
             //var serviceProvider = services.BuildServiceProvider();
             //var jwtOptions = serviceProvider.GetRequiredService<IOptions<AuthOptions>>().Value;
+            var authOptions = configuration.GetSection("AuthOptions").Get<AuthOptions>();
+
 
             services.AddAuthentication(options =>
             {
@@ -19,23 +22,36 @@ namespace LonelyInterview.Auth
             })
                 .AddJwtBearer(options =>
                 {
-                    options.Events = new JwtBearerEvents()
+                    //options.Events = new JwtBearerEvents()
+                    //{
+                    //    OnMessageReceived = context =>
+                    //    {
+                    //        context.Token = context.Request.Cookies["JWT"];
+                    //        return Task.CompletedTask;
+                    //    }
+                    //};
+                    options.Events = new JwtBearerEvents
                     {
-                        OnMessageReceived = context =>
+                        OnTokenValidated = context =>
                         {
-                            context.Token = context.Request.Cookies["JWT"];
+                            Console.WriteLine("Token validated successfully");
+                            return Task.CompletedTask;
+                        },
+                        OnAuthenticationFailed = context =>
+                        {
+                            Console.WriteLine($"Authentication failed: {context.Exception.Message}");
                             return Task.CompletedTask;
                         }
                     };
                     options.TokenValidationParameters = new TokenValidationParameters()
                     {
                         ValidateIssuer = true,
-                        ValidIssuer = "Dmih",
+                        ValidIssuer = authOptions!.Issuer,
                         ValidateAudience = true,
-                        ValidAudience = "Noone",
+                        ValidAudience = authOptions.Audience,
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("mysupersecret_secretsecretsecretkey!123"))
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authOptions.Key))
 
                     };
                 });

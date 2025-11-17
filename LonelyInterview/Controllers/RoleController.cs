@@ -3,6 +3,7 @@ using LonelyInterview.Auth.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace LonelyInterview.Controllers
 {
@@ -13,7 +14,7 @@ namespace LonelyInterview.Controllers
                                ) : ControllerBase
     {
         [HttpPost("CreateRole")]
-        //[Authorize(Roles = nameof(Role.Administrator))]
+        [Authorize(Roles = nameof(Role.Administrator))]
         public async Task<IActionResult> CreateRole(string roleName)
         {
             if (!Enum.TryParse<Role>(roleName, out _))
@@ -28,8 +29,8 @@ namespace LonelyInterview.Controllers
 
 
         [HttpPost("AddToRole")]
-        //[Authorize(Roles = nameof(Role.Administrator))]
-        public async Task<IActionResult> AddToRole(string email, string roleName)
+        [Authorize(Roles = "Candidate")]
+        public async Task<IActionResult> AddToRole([FromQuery]string email,[FromQuery] string roleName)
         {
             if (!Enum.TryParse<Role>(roleName, true, out Role role))
                 return BadRequest("Invalid role");
@@ -42,10 +43,21 @@ namespace LonelyInterview.Controllers
             //var addClaims = await manager.AddClaimAsync(user,new System.Security.Claims.Claim { })
 
             if (!action.Succeeded)
-                return BadRequest(action.Errors);
+                return BadRequest(action.Errors.First().Description);
 
 
             return Ok();
+        }
+
+
+        [HttpGet("Claims")]
+        public ActionResult<IEnumerable<Claim>> CheckClaims()
+        {
+            var authHeader = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+
+            var isInrole = HttpContext.User.IsInRole(nameof(Role.Candidate));
+
+            return Ok(authHeader);
         }
     }
 }

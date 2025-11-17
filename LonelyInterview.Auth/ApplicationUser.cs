@@ -7,15 +7,15 @@ namespace LonelyInterview.Auth;
 
 public class ApplicationUser : IdentityUser<Guid>
 {
-    public string Telegram { get; private set; } = null!;
-    public DateOnly BirthDay { get; private set; }
+    public string? Telegram { get; private set; }
+    public DateOnly? BirthDay { get; private set; }
 
     private ApplicationUser() { }
 
 
 
 
-    public static ApplicationUser CreateFromRegisterDto(RegisterDto dto)
+    public static ApplicationUser CreateFromRegisterDto(RegisterCandidateDto dto)
     {
         if (dto == null)
             throw new ArgumentNullException(nameof(dto));

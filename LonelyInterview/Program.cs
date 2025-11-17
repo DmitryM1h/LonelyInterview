@@ -1,8 +1,9 @@
-﻿using LonelyInterview.Auth;
+﻿using LonelyInterview.Application;
+using LonelyInterview.Auth;
 using LonelyInterview.Auth.Contracts;
-using LonelyInterview.Domain.Interfaces;
 using LonelyInterview.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,18 +11,51 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddCors();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter JWT Token in format: Bearer {your token}"
+    });
 
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()   
+              .AllowAnyMethod() 
+              .AllowAnyHeader();
+    });
+});
 builder.Services.AddDatabaseContext(builder.Configuration);
 builder.Services.AddDatabaseUserContext(builder.Configuration);
 builder.Services.AddDataSources();
-
+builder.Services.AddServices();
 
 builder.Services.Configure<AuthOptions>(
     builder.Configuration.GetSection("AuthOptions"));
 
-builder.Services.AddAuth();
+builder.Services.AddAuth(builder.Configuration);
 
 var identityBuilder = builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(opts =>
 {
@@ -49,38 +83,40 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.UseCors();
+
+
 app.UseAuthentication();
 
-app.Use(async (ctx, next) =>
-{
-    var authEnabled = app.Configuration.GetValue<bool>("AuthOptions:Enabled");
-    var chosenRole = app.Configuration.GetValue<string>("AuthOptions:Role");
-    if (!Enum.TryParse<Role>(chosenRole, true, out Role role))
-    {
-        ctx.Response.StatusCode = StatusCodes.Status400BadRequest;
-        throw new ArgumentException("Invalid role");
-    }
-    if (authEnabled)
-    {
-        await next();
-        return;
-    }
+//app.Use(async (ctx, next) =>
+//{
+//    var authEnabled = app.Configuration.GetValue<bool>("AuthOptions:Enabled");
+//    var chosenRole = app.Configuration.GetValue<string>("AuthOptions:Role");
+//    if (!Enum.TryParse<Role>(chosenRole, true, out Role role))
+//    {
+//        ctx.Response.StatusCode = StatusCodes.Status400BadRequest;
+//        throw new ArgumentException("Invalid role");
+//    }
+//    if (authEnabled)
+//    {
+//        await next();
+//        return;
+//    }
 
-    var claims = new[]
-    {
+//    var claims = new[]
+//    {
             
-            new Claim(ClaimTypes.Role, chosenRole),
-            new Claim("email","dima@gmail.com")
-        };
-    var identity = new ClaimsIdentity(claims, "DisabledAuth");
-    ctx.User = new ClaimsPrincipal(identity);
+//            new Claim(ClaimTypes.Role, chosenRole),
+//            new Claim("email","dima@gmail.com")
+//        };
+//    var identity = new ClaimsIdentity(claims, "DisabledAuth");
+//    ctx.User = new ClaimsPrincipal(identity);
 
-    await next();
-});
+//    await next();
+//});
 
 app.UseAuthorization();
 
-app.UseCors(builder => builder.AllowAnyOrigin());
 
 app.MapControllers();
 

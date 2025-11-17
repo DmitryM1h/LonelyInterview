@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LonelyInterview.Application\LonelyInterview.Application.csproj" />
     <ProjectReference Include="..\LonelyInterview.Domain\LonelyInterview.Domain.csproj" />
     <ProjectReference Include="..\LonelyInterview.Infrastructure\LonelyInterview.Infrastructure.csproj" />
   </ItemGroup>

@@ -1,6 +1,5 @@
-﻿using LonelyInterview.Domain.Entities;
-using LonelyInterview.Domain.Repository;
-using LonelyInterview.Infrastructure.Data;
+﻿using LonelyInterview.Auth.Requests;
+using LonelyInterview.Domain.Entities;
 using LonelyInterview.Infrastructure.Data.DataSources;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,10 +13,10 @@ public class HrManagerController(HrManagerDataSource _hrManagersdataSource) : Co
 {
 
     [HttpGet]
-    public async Task<IEnumerable<HrManager>> GetAllHrManagers()
+    public async Task<ActionResult<IEnumerable<HrManager>>> GetAllHrManagers()
     {
-        return await _hrManagersdataSource.GetAllAsync();
+        var hrManagers =  await _hrManagersdataSource.GetAllAsync();
+        return Ok(hrManagers);
     }
 
- 
 }

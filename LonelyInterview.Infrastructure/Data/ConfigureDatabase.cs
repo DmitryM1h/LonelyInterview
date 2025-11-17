@@ -31,7 +31,7 @@ public static class ConfigureDatabase
         services
         .AddScoped<CandidateDataSource>()
         .AddScoped<HrManagerDataSource>()
-        .AddScoped<UnitOfWork>();
+        .AddScoped<LonelyInterviewUnitOfWork>();
 
 
 

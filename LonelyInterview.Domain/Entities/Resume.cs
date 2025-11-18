@@ -1,4 +1,5 @@
 ﻿using LonelyInterview.Domain.Interfaces;
+using System.Security.Cryptography;
 
 
 namespace LonelyInterview.Domain.Entities;
@@ -20,7 +21,22 @@ public class Resume : IEntity
     public string? PassiveSkills { get; init; }
 
     private Resume() { }
-    
+
+    public static Resume Create(/*Candidate candidate,*/ Vacancy vacancy, string? gitHubUrl = null, string? actualSkills = null, string? passiveSkills = null)
+    {
+        return new Resume
+        {
+            //Id = Guid.NewGuid(),
+            //Candidate = candidate,
+            Vacancy = vacancy,
+            GitHubUrl = gitHubUrl,
+            ActualSkills = actualSkills,
+            PassiveSkills = passiveSkills,
+            Status = ResumeStatus.Submitted,
+            CreatedAt = DateTime.UtcNow
+        };
+    }
+
 }
 
 public enum ResumeStatus

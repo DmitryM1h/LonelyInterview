@@ -29,6 +29,8 @@ public class Vacancy : IEntity
     public WorkFormat WorkFormat { get; set; } = WorkFormat.Office;
 
 
+    public bool isActive => Status == VacancyStatus.Published;
+
     public HrManager ResponsibleHr { get; set; }
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
@@ -89,7 +91,7 @@ public class Vacancy : IEntity
             Currency = string.IsNullOrWhiteSpace(currency) ? "RUB" : currency.Trim().ToUpper(),
             EmploymentType = employmentType,
             WorkFormat = workFormat,
-            Status = VacancyStatus.Draft,
+            Status = VacancyStatus.Published,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

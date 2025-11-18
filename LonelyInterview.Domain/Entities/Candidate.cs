@@ -19,13 +19,11 @@ public class Candidate : IEntity
 
     public void AddResume(Resume resume)
     {
-        // TODO Валидация
         _resumes.Add(resume);
     }
 
     public void AddInfo(CandidateInfo info)
     {
-        // TODO валидация
         if (Info is null)
         {
             Info = info;

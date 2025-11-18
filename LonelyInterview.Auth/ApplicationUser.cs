@@ -1,6 +1,5 @@
 ﻿
 
-using LonelyInterview.Auth.Requests;
 using Microsoft.AspNetCore.Identity;
 
 namespace LonelyInterview.Auth;
@@ -15,24 +14,25 @@ public class ApplicationUser : IdentityUser<Guid>
 
 
 
-    public static ApplicationUser CreateFromRegisterDto(RegisterCandidateDto dto)
+    public static ApplicationUser CreateFromRegisterDto(string UserName, DateOnly? BirthDay,
+                    string Email, string? Telegram, string Password)
     {
-        if (dto == null)
-            throw new ArgumentNullException(nameof(dto));
+        if (string.IsNullOrWhiteSpace(UserName) || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+            throw new ArgumentNullException("Missing necessary fields");
 
         var user = new ApplicationUser
         {
             Id = Guid.NewGuid(),
-            UserName = dto.UserName.Trim(),
-            Email = dto.Email.Trim().ToLower(),     
+            UserName = UserName.Trim(),
+            Email = Email.Trim().ToLower(),     
             
         };
 
-        if (!string.IsNullOrWhiteSpace(dto.Telegram))
-            user.SetTelegram(dto.Telegram.Trim());
+        if (!string.IsNullOrWhiteSpace(Telegram))
+            user.SetTelegram(Telegram.Trim());
 
-        if (dto.BirthDay.HasValue)
-            user.SetBirthDay(dto.BirthDay.Value);
+        if (BirthDay.HasValue)
+            user.SetBirthDay(BirthDay.Value);
 
         return user;
     }

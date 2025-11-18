@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LonelyInterview.Auth.Requests;
+namespace LonelyInterview.Application.Requests;
 
 public record RegisterCandidateDto(string UserName, DateOnly? BirthDay, string? Specialty, string? Degree, int? GraduationYear,
     string Email, string? Telegram, string? WorkExperience, string Password);

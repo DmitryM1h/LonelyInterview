@@ -1,5 +1,5 @@
 ﻿using LonelyInterview.Application.Services;
-using LonelyInterview.Auth.Requests;
+using LonelyInterview.Application.Requests;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,11 +31,23 @@ namespace LonelyInterview.Controllers
 
 
 
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterCandidateDto regRequest, CancellationToken token = default)
+        [HttpPost("Candidate/Register")]
+        public async Task<IActionResult> RegisterCandidate([FromBody] RegisterCandidateDto regRequest, CancellationToken token = default)
         {
 
             var result = await _authService.RegisterCandidateAsync(regRequest, token);
+
+            if (!result.isSuccess) return BadRequest(result.error);
+
+            return Ok();
+        }
+
+
+        [HttpPost("HrManager/Register")]
+        public async Task<IActionResult> RegisterHr([FromBody] RegisterHrDto regRequest, CancellationToken token = default)
+        {
+
+            var result = await _authService.RegisterHrManagerAsync(regRequest, token);
 
             if (!result.isSuccess) return BadRequest(result.error);
 

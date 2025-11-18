@@ -1,7 +1,6 @@
-﻿using LonelyInterview.Auth;
-using LonelyInterview.Auth.Requests;
+﻿using LonelyInterview.Application.Requests;
+using LonelyInterview.Auth;
 using LonelyInterview.Domain.Entities;
-using LonelyInterview.Domain.Repository;
 using LonelyInterview.Infrastructure.Data.DataSources;
 using Microsoft.AspNetCore.Identity;
 using System.Net;
@@ -19,6 +18,7 @@ namespace LonelyInterview.Application.Services
         UserManager<ApplicationUser> userManager,
         TokenGenerator tokenGenerator,
         CandidateDataSource _candidateRepo,
+        HrManagerDataSource _hrManagerRepo,
         LonelyInterviewUnitOfWork _unitOfWork)
     {
 
@@ -52,16 +52,20 @@ namespace LonelyInterview.Application.Services
         public async Task<Result> RegisterCandidateAsync(RegisterCandidateDto regRequest, CancellationToken token)
         {
             //TODO Транзакция
-            var user = ApplicationUser.CreateFromRegisterDto(regRequest);
+            var user = ApplicationUser.CreateFromRegisterDto(
+                                                        UserName: regRequest.UserName,
+                                                        BirthDay: regRequest.BirthDay,
+                                                        Email: regRequest.Email,
+                                                        Telegram: regRequest.Telegram,
+                                                        Password: regRequest.Password
+                                                    );
 
             var result = await userManager.CreateAsync(user, regRequest.Password);
 
             if (!result.Succeeded)
                 return new Result(false, result.Errors.First().Description.ToString());
 
-            await userManager.AddToRoleAsync(user, nameof(Candidate));
-            await userManager.AddClaimAsync(user, new Claim("email", regRequest.Email));
-            await userManager.AddClaimAsync(user, new Claim(ClaimTypes.Name, regRequest.UserName));
+            await AddToRole(user, nameof(Candidate));
 
 
             var cand = Candidate.CreateCandidate(user.Id, CandidateInfo.Create(user.Id, regRequest.Specialty, regRequest.Degree, regRequest.GraduationYear, regRequest.WorkExperience));
@@ -73,6 +77,47 @@ namespace LonelyInterview.Application.Services
             return new Result(true, null);
         }
 
+        public async Task<Result> RegisterHrManagerAsync(RegisterHrDto regRequest, CancellationToken token)
+        {
+            //TODO Транзакция
+            var user = ApplicationUser.CreateFromRegisterDto(
+                                                        UserName: regRequest.UserName,
+                                                        BirthDay: regRequest.BirthDay,
+                                                        Email: regRequest.Email,
+                                                        Telegram: regRequest.Telegram,
+                                                        Password: regRequest.Password
+                                                    );
 
+            var result = await userManager.CreateAsync(user, regRequest.Password);
+
+            if (!result.Succeeded)
+                return new Result(false, result.Errors.First().Description.ToString());
+
+            await AddToRole(user, nameof(HrManager));
+
+            //await userManager.AddToRoleAsync(user, nameof(HrManager));
+            //await userManager.AddClaimAsync(user, new Claim("email", regRequest.Email));
+            //await userManager.AddClaimAsync(user, new Claim(ClaimTypes.Name, regRequest.UserName));
+            //await userManager.AddClaimAsync(user, new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
+
+
+
+            var hr = HrManager.CreateHr(user.Id, regRequest.Company);
+
+            await _hrManagerRepo.AddAsync(hr, token);
+
+            await _unitOfWork.SaveAsync(token);
+
+            return new Result(true, null);
+        }
+
+
+        private async Task AddToRole(ApplicationUser user, string Role)
+        {
+            await userManager.AddToRoleAsync(user, Role);
+            await userManager.AddClaimAsync(user, new Claim("email", user!.Email!));
+            await userManager.AddClaimAsync(user, new Claim(ClaimTypes.Name, user.UserName!));
+            await userManager.AddClaimAsync(user, new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
+        }
     }
 }

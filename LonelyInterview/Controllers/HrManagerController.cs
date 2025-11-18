@@ -12,7 +12,7 @@ namespace LonelyInterview.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class HrManagerController(HrManagerDataSource _hrManagersdataSource, LonelyInterviewUnitOfWork _unitOfWork, LonelyInterviewContext _context) : ControllerBase
+public class HrManagerController(HrManagerDataSource _hrManagersdataSource, LonelyInterviewUnitOfWork _unitOfWork) : ControllerBase
 {
 
     [HttpGet("AllManagers")]
@@ -39,8 +39,6 @@ public class HrManagerController(HrManagerDataSource _hrManagersdataSource, Lone
             request.Currency);
 
         currHr.CreateVacancy(vacancy);
-
-        await _context.SaveChangesAsync(token);
 
         await _unitOfWork.SaveAsync(token);
 

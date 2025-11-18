@@ -1,7 +1,7 @@
 ﻿using LonelyInterview.Application.Services;
-using LonelyInterview.Application.Requests;
 
 using Microsoft.AspNetCore.Mvc;
+using LonelyInterview.Application.Requests.Auth;
 
 namespace LonelyInterview.Controllers
 {

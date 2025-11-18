@@ -57,7 +57,19 @@ namespace LonelyInterview.Controllers
 
             var isInrole = HttpContext.User.IsInRole(nameof(Role.Candidate));
 
-            return Ok(authHeader);
+            var userClaims = HttpContext.User.Claims.Select(t => t.Value).ToList();
+
+            return Ok(userClaims);
         }
+
+        [HttpGet("AssertRole")]
+        public ActionResult<bool> AssertRole(string Role)
+        {
+
+            var isInrole = HttpContext.User.IsInRole(Role);
+
+            return Ok(isInrole);
+        }
+
     }
 }

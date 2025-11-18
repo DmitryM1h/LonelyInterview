@@ -11,7 +11,7 @@ public class Resume : IEntity
 
     public Vacancy Vacancy { get; init; }
 
-    public ResumeStatus Status { get; set; } = ResumeStatus.Draft;
+    public ResumeStatus Status { get; set; } = ResumeStatus.Submitted;
     public DateTime CreatedAt { get; init; } = DateTime.UtcNow;
 
 
@@ -25,7 +25,6 @@ public class Resume : IEntity
 
 public enum ResumeStatus
 {
-    Draft,          
     Submitted,    
     UnderReview,
     Rejected,

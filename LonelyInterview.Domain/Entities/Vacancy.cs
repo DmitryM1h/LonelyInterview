@@ -35,6 +35,67 @@ public class Vacancy : IEntity
     public DateTime? PublishedAt { get; set; }
     public DateTime? ClosedAt { get; set; }
 
+    public static Vacancy Create(
+        string title,
+        string description,
+        string requiredSkills,
+        string location,
+        HrManager responsibleHr,
+        string? shortDescription = null,
+        string? niceToHaveSkills = null,
+        int? minYearsOfExperience = null,
+        decimal? salaryFrom = null,
+        decimal? salaryTo = null,
+        string? currency = "RUB",
+        EmploymentType employmentType = EmploymentType.FullTime,
+        WorkFormat workFormat = WorkFormat.Office)
+    {
+        if (string.IsNullOrWhiteSpace(title))
+            throw new ArgumentException("Title cannot be null or empty", nameof(title));
+
+        if (string.IsNullOrWhiteSpace(description))
+            throw new ArgumentException("Description cannot be null or empty", nameof(description));
+
+        if (string.IsNullOrWhiteSpace(requiredSkills))
+            throw new ArgumentException("Required skills cannot be null or empty", nameof(requiredSkills));
+
+        if (string.IsNullOrWhiteSpace(location))
+            throw new ArgumentException("Location cannot be null or empty", nameof(location));
+
+        if (responsibleHr == null)
+            throw new ArgumentNullException(nameof(responsibleHr));
+
+        if (salaryFrom.HasValue && salaryTo.HasValue && salaryFrom > salaryTo)
+            throw new ArgumentException("SalaryFrom cannot be greater than SalaryTo");
+
+        if (minYearsOfExperience.HasValue && minYearsOfExperience < 0)
+            throw new ArgumentException("Years of experience cannot be negative", nameof(minYearsOfExperience));
+
+        if (!string.IsNullOrWhiteSpace(currency) && currency.Length != 3)
+            throw new ArgumentException("Currency must be 3-letter code", nameof(currency));
+
+        var vacancy = new Vacancy
+        {
+            Title = title.Trim(),
+            Description = description.Trim(),
+            RequiredSkills = requiredSkills.Trim(),
+            Location = location.Trim(),
+          //  ResponsibleHr = responsibleHr,
+            ShortDescription = string.IsNullOrWhiteSpace(shortDescription) ? null : shortDescription.Trim(),
+            NiceToHaveSkills = string.IsNullOrWhiteSpace(niceToHaveSkills) ? null : niceToHaveSkills.Trim(),
+            MinYearsOfExperience = minYearsOfExperience,
+            SalaryFrom = salaryFrom,
+            SalaryTo = salaryTo,
+            Currency = string.IsNullOrWhiteSpace(currency) ? "RUB" : currency.Trim().ToUpper(),
+            EmploymentType = employmentType,
+            WorkFormat = workFormat,
+            Status = VacancyStatus.Draft,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+
+        return vacancy;
+    }
 
     private Vacancy() { }
 }

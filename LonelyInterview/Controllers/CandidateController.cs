@@ -18,7 +18,7 @@ namespace LonelyInterview.Controllers
             return Ok(candidates);
         }
 
-        [HttpPost("Update")]
+        [HttpPost("UpdateInfo")]
         public async Task<ActionResult> UpdateCandidateInfo([FromBody] UpdateCandidatesInfoRequest updRequest, CancellationToken token = default)
         {
             var cand = await _candidateDatasource.GetCandidateWithInfo(updRequest.CandidateId, token);
@@ -30,10 +30,16 @@ namespace LonelyInterview.Controllers
             cand.UpdateInfo(info);
             await _unitOfWork.SaveAsync(token);
             return Ok(info);
-
-
-     
-
         }
+
+
+
+        //[HttpPost("AddResume")]
+        //public async Task<ActionResult> UpdateCandidateInfo([FromBody] UpdateCandidatesInfoRequest updRequest, CancellationToken token = default)
+        //{
+
+
+        //}
+
     }
 }

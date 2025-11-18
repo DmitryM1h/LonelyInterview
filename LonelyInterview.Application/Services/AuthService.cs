@@ -1,4 +1,4 @@
-﻿using LonelyInterview.Application.Requests;
+﻿using LonelyInterview.Application.Requests.Auth;
 using LonelyInterview.Auth;
 using LonelyInterview.Domain.Entities;
 using LonelyInterview.Infrastructure.Data.DataSources;

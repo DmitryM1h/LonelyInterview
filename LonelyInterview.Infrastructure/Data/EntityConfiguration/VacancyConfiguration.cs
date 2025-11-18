@@ -12,6 +12,8 @@ internal class VacancyConfiguration : IEntityTypeConfiguration<Vacancy>
         builder
             .HasKey(t => t.Id);
 
+     
+
         builder
             .HasOne(t => t.ResponsibleHr)
             .WithMany(t => t.Vacancies)

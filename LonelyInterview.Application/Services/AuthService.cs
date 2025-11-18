@@ -22,6 +22,7 @@ namespace LonelyInterview.Application.Services
         LonelyInterviewUnitOfWork _unitOfWork)
     {
 
+   
         public async Task<Result<string>> LoginAsync(LoginDto logDto)
         {
             var user = await userManager.FindByEmailAsync(logDto.Email);
@@ -35,12 +36,14 @@ namespace LonelyInterview.Application.Services
             if (!p.Succeeded)
                 return new Result<string>(false, "Invalid login or password", null);
 
-            var roles = await userManager.GetRolesAsync(user);
-            var userClaims = await userManager.GetClaimsAsync(user);
+            //var roles = await userManager.GetRolesAsync(user);
+            //var userClaims = await userManager.GetClaimsAsync(user);
 
-            var claims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
+            //var claims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
 
-            claims.AddRange(userClaims);
+            //claims.AddRange(userClaims);
+
+            var claims = await GetUserClaimsAsync(user);
 
             var token = tokenGenerator.GenerateToken(claims);
 
@@ -95,19 +98,13 @@ namespace LonelyInterview.Application.Services
 
             await AddToRole(user, nameof(HrManager));
 
-            //await userManager.AddToRoleAsync(user, nameof(HrManager));
-            //await userManager.AddClaimAsync(user, new Claim("email", regRequest.Email));
-            //await userManager.AddClaimAsync(user, new Claim(ClaimTypes.Name, regRequest.UserName));
-            //await userManager.AddClaimAsync(user, new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
-
-
 
             var hr = HrManager.CreateHr(user.Id, regRequest.Company);
 
             await _hrManagerRepo.AddAsync(hr, token);
 
             await _unitOfWork.SaveAsync(token);
-
+            
             return new Result(true, null);
         }
 
@@ -118,6 +115,16 @@ namespace LonelyInterview.Application.Services
             await userManager.AddClaimAsync(user, new Claim("email", user!.Email!));
             await userManager.AddClaimAsync(user, new Claim(ClaimTypes.Name, user.UserName!));
             await userManager.AddClaimAsync(user, new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
+        }
+
+        private async Task<List<Claim>> GetUserClaimsAsync(ApplicationUser user)
+        {
+            var roles = await userManager.GetRolesAsync(user);
+            var userClaims = await userManager.GetClaimsAsync(user);
+            var claims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
+            claims.AddRange(userClaims);
+
+            return claims;
         }
     }
 }

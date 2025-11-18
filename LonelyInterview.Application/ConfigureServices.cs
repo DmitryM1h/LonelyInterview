@@ -10,8 +10,12 @@ namespace LonelyInterview.Application
 {
     public static class ConfigureServices
     {
-        public static IServiceCollection AddServices(this IServiceCollection services) =>
+        public static void AddApplicationServices(this IServiceCollection services)
+        {
             services.AddScoped<AuthService>();
+            services.AddSignalR();
+            
+        }
           
         
     }

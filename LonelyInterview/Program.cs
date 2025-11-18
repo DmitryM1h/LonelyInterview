@@ -1,4 +1,5 @@
 ﻿using LonelyInterview.Application;
+using LonelyInterview.Application.Interview;
 using LonelyInterview.Auth;
 using LonelyInterview.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
@@ -41,19 +42,20 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
+
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()   
-              .AllowAnyMethod() 
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
               .AllowAnyHeader();
     });
 });
 builder.Services.AddDatabaseContext(builder.Configuration);
 builder.Services.AddDatabaseUserContext(builder.Configuration);
 builder.Services.AddDataSources();
-builder.Services.AddServices();
 
 builder.Services.Configure<AuthOptions>(
     builder.Configuration.GetSection("AuthOptions"));
@@ -72,6 +74,9 @@ var identityBuilder = builder.Services.AddIdentity<ApplicationUser, IdentityRole
 
 builder.Services.AddAuth(builder.Configuration); // Добавляем после identity чтобы перезатереть дефолтную cookie авторизацию
 
+builder.Services.AddApplicationServices();
+
+
 
 var app = builder.Build();
 
@@ -84,21 +89,23 @@ if (app.Environment.IsDevelopment())
 }
 
 
-app.Use(async (ctx, next) =>
-{
-    Console.WriteLine($"➡️ Incoming Request: {ctx.Request.Method} {ctx.Request.Path}");
-    Console.WriteLine($"Authorization Header: {ctx.Request.Headers.Authorization}");
+//app.Use(async (ctx, next) =>
+//{
+//    Console.WriteLine($"➡️ Incoming Request: {ctx.Request.Method} {ctx.Request.Path}");
+//    Console.WriteLine($"Authorization Header: {ctx.Request.Headers.Authorization}");
 
-    await next();
+//    await next();
 
-    Console.WriteLine($"⬅️ Response: {ctx.Response.StatusCode}");
-});
+//    Console.WriteLine($"⬅️ Response: {ctx.Response.StatusCode}");
+//});
 
 app.UseHttpsRedirection();
 
-app.UseRouting();
+app.UseStaticFiles();
+app.UseCors("AllowAll");
 
-app.UseCors();
+
+app.UseRouting();
 
 
 app.UseAuthentication();
@@ -141,6 +148,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 
+app.MapHub<InterviewHub>("/interview");
 app.MapControllers();
 
 

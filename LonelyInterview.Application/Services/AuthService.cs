@@ -36,13 +36,6 @@ namespace LonelyInterview.Application.Services
             if (!p.Succeeded)
                 return new Result<string>(false, "Invalid login or password", null);
 
-            //var roles = await userManager.GetRolesAsync(user);
-            //var userClaims = await userManager.GetClaimsAsync(user);
-
-            //var claims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
-
-            //claims.AddRange(userClaims);
-
             var claims = await GetUserClaimsAsync(user);
 
             var token = tokenGenerator.GenerateToken(claims);
@@ -115,14 +108,21 @@ namespace LonelyInterview.Application.Services
             await userManager.AddClaimAsync(user, new Claim("email", user!.Email!));
             await userManager.AddClaimAsync(user, new Claim(ClaimTypes.Name, user.UserName!));
             await userManager.AddClaimAsync(user, new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
+            await userManager.AddClaimAsync(user, new Claim(ClaimTypes.Role, Role));
+            await userManager.AddClaimAsync(user, new Claim("sub", user.Id.ToString()));
+
+
         }
 
         private async Task<List<Claim>> GetUserClaimsAsync(ApplicationUser user)
         {
             var roles = await userManager.GetRolesAsync(user);
             var userClaims = await userManager.GetClaimsAsync(user);
+
             var claims = roles.Select(role => new Claim(ClaimTypes.Role, role)).ToList();
+            var doubledRoles = roles.Select(role => new Claim("role", role)).ToList();
             claims.AddRange(userClaims);
+            claims.AddRange(doubledRoles);
 
             return claims;
         }

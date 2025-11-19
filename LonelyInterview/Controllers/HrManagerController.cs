@@ -1,12 +1,10 @@
 ﻿using LonelyInterview.Application.Requests.Hr;
 using LonelyInterview.Auth.Contracts;
 using LonelyInterview.Domain.Entities;
-using LonelyInterview.Infrastructure.Data;
 using LonelyInterview.Infrastructure.Data.DataSources;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using Microsoft.EntityFrameworkCore;
 
 namespace LonelyInterview.Controllers;
 
@@ -88,9 +86,7 @@ public class HrManagerController(HrManagerDataSource _hrManagersdataSource, Lone
         if (currHrId is null)
             return Unauthorized();
 
-        Guid currHrIdGuid = Guid.Parse(currHrId);
-
-        var vacancies = await _vacancyDataSource.GetVacanciesByHrIdAsync(currHrIdGuid, token);
+        var vacancies = await _vacancyDataSource.GetVacanciesByHrIdAsync(Guid.Parse(currHrId), token);
 
         return Ok(vacancies);
     }

@@ -53,10 +53,6 @@ namespace LonelyInterview.Controllers
         [HttpGet("Claims")]
         public ActionResult<IEnumerable<Claim>> CheckClaims()
         {
-            var authHeader = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
-
-            var isInrole = HttpContext.User.IsInRole(nameof(Role.Candidate));
-
             var userClaims = HttpContext.User.Claims.Select(t => t.Value).ToList();
 
             return Ok(userClaims);

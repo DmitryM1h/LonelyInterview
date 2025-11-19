@@ -1,12 +1,14 @@
 ﻿
 
 
-
-
+using LonelyInterview.Auth.Contracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace LonelyInterview.Application.Interview
 {
+    // [Authorize(Roles = nameof(Role.Candidate))]
+    [Authorize]
     public class InterviewHub : Hub
     {
 

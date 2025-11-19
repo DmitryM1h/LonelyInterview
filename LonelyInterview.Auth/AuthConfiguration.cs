@@ -30,6 +30,7 @@ namespace LonelyInterview.Auth
                     //        return Task.CompletedTask;
                     //    }
                     //};
+
                     options.Events = new JwtBearerEvents
                     {
                         OnTokenValidated = context =>
@@ -41,7 +42,29 @@ namespace LonelyInterview.Auth
                         {
                             Console.WriteLine($"Authentication failed: {context.Exception.Message}");
                             return Task.CompletedTask;
-                        }
+                        },
+                        OnMessageReceived = context =>
+                        {
+                            //var accessToken = context.Request.Headers["Authorization"].FirstOrDefault();
+                            //if (!string.IsNullOrEmpty(accessToken) && accessToken.StartsWith("Bearer "))
+                            //{
+                            //    context.Token = accessToken.Substring("Bearer ".Length);
+                            //    Console.WriteLine($"✅ JWT token extracted from Authorization header");
+                            //    return Task.CompletedTask;
+                            //}
+
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+
+                            if (!string.IsNullOrEmpty(accessToken) &&
+                                path.StartsWithSegments("/interview"))
+                            {
+                                context.Token = accessToken;
+                                Console.WriteLine($"JWT token extracted from query string for SignalR");
+                            }
+
+                            return Task.CompletedTask;
+                        },
                     };
                     options.TokenValidationParameters = new TokenValidationParameters()
                     {

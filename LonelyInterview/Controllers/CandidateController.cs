@@ -10,7 +10,11 @@ namespace LonelyInterview.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CandidateController(CandidateDataSource _candidateDatasource, LonelyInterviewUnitOfWork _unitOfWork, VacancyDataSource _vacancyDatasource) : ControllerBase
+public class CandidateController(
+    CandidateDataSource _candidateDatasource,
+    LonelyInterviewUnitOfWork _unitOfWork,
+    VacancyDataSource _vacancyDatasource,
+    ResumeDataSource _resumeDatasource) : ControllerBase
 {
 
     [HttpGet]
@@ -25,7 +29,7 @@ public class CandidateController(CandidateDataSource _candidateDatasource, Lonel
     public async Task<ActionResult> UpdateInfo([FromBody] UpdateCandidatesInfoRequest updRequest, CancellationToken token = default)
     {
         var candidateId = HttpContext.User.Claims.Where(t => t.Type == ClaimTypes.NameIdentifier).First().Value;
-    
+
         var cand = await _candidateDatasource.GetCandidateWithInfo(Guid.Parse(candidateId), token);
 
         if (cand == null)
@@ -67,6 +71,33 @@ public class CandidateController(CandidateDataSource _candidateDatasource, Lonel
         return Ok(new { resume.Id, resume.Vacancy.ShortDescription, resume?.ActualSkills, resume?.PassiveSkills });
 
     }
+
+    [HttpGet("Resumes")]
+    [Authorize(Roles = nameof(Role.Candidate))]
+    public async Task<ActionResult> GetCandidatesResumes(CancellationToken token = default)
+    {
+        var candidateId = HttpContext.User.Claims.Where(t => t.Type == ClaimTypes.NameIdentifier).First().Value;
+
+        if (candidateId is null)
+            return Forbid();
+
+        var resumes = await _resumeDatasource.GetByCandidateIdWithVacancyInfoAsync(Guid.Parse(candidateId), token);
+
+        return Ok(resumes.Select(t => new 
+        { t.Vacancy.Title,
+          t.Vacancy.ShortDescription,
+          t.Status,
+          t.CreatedAt,
+          t.GitHubUrl,
+          t.ActualSkills,
+          t.PassiveSkills 
+        }).ToList());
+
+
+    }
+
+   
+
 
   
 }

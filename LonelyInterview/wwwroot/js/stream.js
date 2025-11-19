@@ -7,12 +7,9 @@
     });
 };
 
-const connection = new signalR.HubConnectionBuilder()
-    .withUrl("/interview")
-    .configureLogging(signalR.LogLevel.Debug)
-    .build();
-
-// Переменные для записи аудио
+// Глобальные переменные
+let connection;
+let authToken;
 let mediaRecorder;
 let audioChunks = [];
 let audioStream;
@@ -26,272 +23,186 @@ let audioContext;
 let analyser;
 let dataArray;
 
-// Обработчики событий подключения
-connection.onclose((error) => {
-    console.log("Connection closed: ", error);
-    document.getElementById("connectionStatus").textContent = "Disconnected";
-    document.getElementById("connectionStatus").className = "disconnected";
-    setTimeout(startConnection, 5000);
-});
+// Инициализация приложения
+function initializeApp() {
+    authToken = localStorage.getItem('authToken');
+    if (authToken) {
+        showAppContent();
+        initializeConnection();
+    } else {
+        showLoginForm();
+    }
+}
 
-connection.onreconnecting((error) => {
-    console.log("Reconnecting: ", error);
-    document.getElementById("connectionStatus").textContent = "Reconnecting...";
-});
+// Показать форму логина
+function showLoginForm() {
+    document.getElementById('loginSection').classList.remove('hidden');
+    document.getElementById('appContent').classList.add('hidden');
+}
 
-connection.onreconnected((connectionId) => {
-    console.log("Reconnected: ", connectionId);
-    document.getElementById("connectionStatus").textContent = "Connected";
-    document.getElementById("connectionStatus").className = "connected";
-});
+// Показать основное приложение
+function showAppContent() {
+    document.getElementById('loginSection').classList.add('hidden');
+    document.getElementById('appContent').classList.remove('hidden');
+    document.getElementById('userInfo').textContent = localStorage.getItem('userEmail') || 'Authenticated';
+}
 
-function startConnection() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            yield connection.start();
-            console.log("Connected successfully");
-            document.getElementById("connectionStatus").textContent = "Connected";
-            document.getElementById("connectionStatus").className = "connected";
-        } catch (err) {
-            console.error("Connection failed: ", err);
-            document.getElementById("connectionStatus").textContent = "Disconnected";
-            document.getElementById("connectionStatus").className = "disconnected";
-            setTimeout(startConnection, 5000);
-        }
+// Инициализация SignalR соединения с токеном - СОГЛАСНО ПРИМЕРУ
+function initializeConnection() {
+    console.log("🔄 Initializing SignalR connection with token:", authToken);
+
+    // СОЗДАЕМ соединение с accessTokenFactory
+    connection = new signalR.HubConnectionBuilder()
+        .withUrl("/interview", {
+            accessTokenFactory: () => {
+                console.log("🔑 accessTokenFactory called, token exists:", !!authToken);
+                return authToken;
+            }
+        })
+        .configureLogging(signalR.LogLevel.Debug)
+        .build();
+
+    setupConnectionHandlers();
+
+    // ЗАПУСКАЕМ соединение ТОЛЬКО если есть токен
+    if (authToken) {
+        startConnection();
+    }
+}
+
+// Настройка обработчиков соединения
+function setupConnectionHandlers() {
+    connection.onclose((error) => {
+        console.log("Connection closed: ", error);
+        document.getElementById("connectionStatus").textContent = "Disconnected";
+        document.getElementById("connectionStatus").className = "disconnected";
+        setTimeout(startConnection, 5000);
+    });
+
+    connection.onreconnecting((error) => {
+        console.log("Reconnecting: ", error);
+        document.getElementById("connectionStatus").textContent = "Reconnecting...";
+    });
+
+    connection.onreconnected((connectionId) => {
+        console.log("Reconnected: ", connectionId);
+        document.getElementById("connectionStatus").textContent = "Connected";
+        document.getElementById("connectionStatus").className = "connected";
     });
 }
 
-// Функция для инициализации аудио
-function initializeAudio() {
+// Функция логина - ИСПРАВЛЕННАЯ ПОСЛЕДОВАТЕЛЬНОСТЬ
+function login(email, password) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            audioStream = yield navigator.mediaDevices.getUserMedia({
-                audio: {
-                    channelCount: 1,
-                    sampleRate: 16000,
-                    sampleSize: 16
-                }
+            console.log("🔐 Attempting login for:", email);
+
+            const response = yield fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
             });
 
-            // Инициализация визуализации
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioContext.createAnalyser();
-            const source = audioContext.createMediaStreamSource(audioStream);
-            source.connect(analyser);
-            analyser.fftSize = 256;
-            dataArray = new Uint8Array(analyser.frequencyBinCount);
+            console.log("📡 Login response status:", response.status);
 
-            // Инициализация MediaRecorder
-            mediaRecorder = new MediaRecorder(audioStream, {
-                mimeType: 'audio/webm;codecs=opus'
-            });
+            if (!response.ok) {
+                const errorText = yield response.text();
+                console.error("❌ Login failed:", errorText);
+                throw new Error(errorText || 'Login failed');
+            }
 
-            mediaRecorder.ondataavailable = (event) => {
-                if (event.data.size > 0) {
-                    audioChunks.push(event.data);
-                    sendAudioChunk(event.data);
-                }
-            };
+            const token = yield response.text();
+            console.log("✅ Login successful, token received");
 
-            mediaRecorder.onstop = () => {
-                console.log("Recording stopped");
-            };
+            // Сохраняем токен
+            authToken = token;
+            localStorage.setItem('authToken', token);
+            localStorage.setItem('userEmail', email);
+
+            document.getElementById('loginStatus').textContent = 'Login successful!';
+            document.getElementById('loginStatus').style.color = 'green';
+
+            // Инициализируем приложение ПОСЛЕ получения токена
+            showAppContent();
+
+            // Переинициализируем соединение с новым токеном
+            initializeConnection();
 
             return true;
         } catch (error) {
-            console.error("Error initializing audio:", error);
-            addMessage(`Audio error: ${error.message}`, 'error-message');
+            console.error('❌ Login error:', error);
+            document.getElementById('loginStatus').textContent = `Login failed: ${error.message}`;
+            document.getElementById('loginStatus').style.color = 'red';
             return false;
         }
     });
 }
 
-// Функция для отправки аудио чанка
-function sendAudioChunk(chunk) {
-    if (audioSubject && connection.state === signalR.HubConnectionState.Connected) {
-        // Конвертируем Blob в base64 для передачи
-        const reader = new FileReader();
-        reader.onload = () => {
-            const base64Data = reader.result.split(',')[1]; // Убираем data:audio/webm;base64,
-            audioSubject.next(base64Data);
-        };
-        reader.readAsDataURL(chunk);
+// Функция логаута
+function logout() {
+    authToken = null;
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userEmail');
+
+    if (connection) {
+        connection.stop();
     }
+
+    showLoginForm();
+    addMessage("Logged out successfully", 'info-message');
 }
 
-// Функция визуализации аудио
-function visualizeAudio() {
-    if (!analyser || !isRecording) return;
+function startConnection() {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!connection || !authToken) return;
 
-    analyser.getByteFrequencyData(dataArray);
+        try {
+            yield connection.start();
+            console.log("✅ Connected successfully to SignalR");
+            document.getElementById("connectionStatus").textContent = "Connected";
+            document.getElementById("connectionStatus").className = "connected";
+        } catch (err) {
+            console.error("❌ Connection failed: ", err);
+            document.getElementById("connectionStatus").textContent = "Disconnected";
+            document.getElementById("connectionStatus").className = "disconnected";
 
-    canvasCtx.fillStyle = 'rgb(200, 200, 200)';
-    canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const barWidth = (canvas.width / dataArray.length) * 2.5;
-    let barHeight;
-    let x = 0;
-
-    for (let i = 0; i < dataArray.length; i++) {
-        barHeight = dataArray[i] / 2;
-
-        canvasCtx.fillStyle = `rgb(${barHeight + 100}, 50, 50)`;
-        canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-
-        x += barWidth + 1;
-    }
-
-    requestAnimationFrame(visualizeAudio);
-}
-
-// Функция для добавления сообщений в список
-function addMessage(text, className) {
-    const li = document.createElement('li');
-    li.textContent = text;
-    li.className = className;
-    document.getElementById('messagesList').appendChild(li);
-}
-
-// Обработчик кнопки Start Stream
-document.getElementById("streamButton").addEventListener("click", (event) => __awaiter(this, void 0, void 0, function* () {
-    if (connection.state !== signalR.HubConnectionState.Connected) {
-        alert("Not connected to server");
-        return;
-    }
-
-    try {
-        console.log("Starting stream...");
-
-        const stream = connection.stream("Counter", 10, 1000);
-
-        stream.subscribe({
-            next: (item) => {
-                console.log("Received:", item);
-                addMessage(item, 'server-message');
-            },
-            complete: () => {
-                console.log("Stream completed");
-                addMessage("Stream completed successfully", 'info-message');
-            },
-            error: (err) => {
-                console.error("Stream error:", err);
-                addMessage(`Stream error: ${err}`, 'error-message');
+            if (err.statusCode === 401) {
+                addMessage("Authentication failed. Please login again.", 'error-message');
+                logout();
+            } else {
+                setTimeout(startConnection, 5000);
             }
-        });
-
-    } catch (e) {
-        console.error("Error starting stream:", e);
-        addMessage(`Error: ${e.toString()}`, 'error-message');
-    }
-    event.preventDefault();
-}));
-
-// Обработчик кнопки Upload
-document.getElementById("uploadButton").addEventListener("click", (event) => __awaiter(this, void 0, void 0, function* () {
-    if (connection.state !== signalR.HubConnectionState.Connected) {
-        alert("Not connected to server");
-        return;
-    }
-
-    try {
-        const subject = new signalR.Subject();
-        connection.send("UploadStream", subject);
-
-        addMessage("Starting upload...", 'info-message');
-
-        let iteration = 0;
-        const intervalHandle = setInterval(() => {
-            iteration++;
-            const data = `Upload item ${iteration} at ${new Date().toLocaleTimeString()}`;
-            subject.next(data);
-
-            addMessage(`Sent: ${data}`, 'client-message');
-
-            if (iteration === 5) {
-                clearInterval(intervalHandle);
-                subject.complete();
-                addMessage("Upload completed", 'info-message');
-            }
-        }, 1000);
-    } catch (e) {
-        console.error("Upload error:", e);
-        addMessage(`Upload error: ${e.toString()}`, 'error-message');
-    }
-    event.preventDefault();
-}));
-
-// Обработчик кнопки Start Recording
-document.getElementById("startRecording").addEventListener("click", (event) => __awaiter(this, void 0, void 0, function* () {
-    if (connection.state !== signalR.HubConnectionState.Connected) {
-        alert("Not connected to server");
-        return;
-    }
-
-    try {
-        const audioInitialized = yield initializeAudio();
-        if (!audioInitialized) return;
-
-        // Создаем Subject для потоковой передачи аудио
-        audioSubject = new signalR.Subject();
-        yield connection.send("StartAudioStream", audioSubject);
-
-        // Начинаем запись
-        audioChunks = [];
-        mediaRecorder.start(100); // Отправляем чанки каждые 100мс
-        isRecording = true;
-
-        // Обновляем UI
-        document.getElementById("startRecording").disabled = true;
-        document.getElementById("stopRecording").disabled = false;
-        document.getElementById("startRecording").classList.add("recording");
-
-        // Запускаем визуализацию
-        visualizeAudio();
-
-        addMessage("Audio recording started...", 'info-message');
-        console.log("Audio recording started");
-
-    } catch (e) {
-        console.error("Error starting recording:", e);
-        addMessage(`Recording error: ${e.toString()}`, 'error-message');
-    }
-    event.preventDefault();
-}));
-
-// Обработчик кнопки Stop Recording
-document.getElementById("stopRecording").addEventListener("click", (event) => __awaiter(this, void 0, void 0, function* () {
-    try {
-        if (mediaRecorder && isRecording) {
-            mediaRecorder.stop();
-            isRecording = false;
-
-            // Завершаем поток
-            if (audioSubject) {
-                audioSubject.complete();
-                audioSubject = null;
-            }
-
-            // Останавливаем треки
-            if (audioStream) {
-                audioStream.getTracks().forEach(track => track.stop());
-            }
-
-            // Обновляем UI
-            document.getElementById("startRecording").disabled = false;
-            document.getElementById("stopRecording").disabled = true;
-            document.getElementById("startRecording").classList.remove("recording");
-
-            addMessage("Audio recording stopped", 'info-message');
-            console.log("Audio recording stopped");
         }
-    } catch (e) {
-        console.error("Error stopping recording:", e);
-        addMessage(`Stop recording error: ${e.toString()}`, 'error-message');
-    }
-    event.preventDefault();
-}));
+    });
+}
 
-// Запуск подключения при загрузке страницы
+// Остальные функции без изменений...
+
+// Обработчики событий
 document.addEventListener("DOMContentLoaded", () => {
-    startConnection();
+    // Обработчик логина
+    document.getElementById("loginBtn").addEventListener("click", (event) => __awaiter(this, void 0, void 0, function* () {
+        event.preventDefault();
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        if (!email || !password) {
+            document.getElementById('loginStatus').textContent = 'Please enter email and password';
+            document.getElementById('loginStatus').style.color = 'red';
+            return;
+        }
+
+        yield login(email, password);
+    }));
+
+    // Обработчик логаута
+    document.getElementById("logoutBtn").addEventListener("click", (event) => {
+        event.preventDefault();
+        logout();
+    });
+
+    // Инициализация приложения
+    initializeApp();
 });

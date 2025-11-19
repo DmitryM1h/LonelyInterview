@@ -52,25 +52,55 @@
         #audioVisualization {
             margin: 10px 0;
         }
+
+        #loginSection {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+            #loginSection input {
+                margin: 5px;
+                padding: 8px;
+                width: 200px;
+            }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <h1>Audio Streaming Test</h1>
-    <div>Status: <span id="connectionStatus" class="disconnected">Disconnected</span></div>
-
-    <div>
-        <button id="streamButton">Start Stream (Server → Client)</button>
-        <button id="uploadButton">Start Upload (Client → Server)</button>
-        <button id="startRecording">Start Audio Recording</button>
-        <button id="stopRecording" disabled>Stop Audio Recording</button>
+    <div id="loginSection">
+        <h2>Login Required</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button id="loginBtn">Login</button>
+        <div id="loginStatus"></div>
     </div>
 
-    <div id="audioVisualization">
-        <canvas id="visualizer" width="400" height="100" style="border: 1px solid #ccc;"></canvas>
-    </div>
+    <div id="appContent" class="hidden">
+        <h1>Audio Streaming Test</h1>
+        <div>Status: <span id="connectionStatus" class="disconnected">Disconnected</span></div>
+        <div>User: <span id="userInfo">Not logged in</span></div>
 
-    <h3>Messages:</h3>
-    <ul id="messagesList"></ul>
+        <div>
+            <button id="streamButton">Start Stream (Server → Client)</button>
+            <button id="uploadButton">Start Upload (Client → Server)</button>
+            <button id="startRecording">Start Audio Recording</button>
+            <button id="stopRecording" disabled>Stop Audio Recording</button>
+            <button id="logoutBtn">Logout</button>
+        </div>
+
+        <div id="audioVisualization">
+            <canvas id="visualizer" width="400" height="100" style="border: 1px solid #ccc;"></canvas>
+        </div>
+
+        <h3>Messages:</h3>
+        <ul id="messagesList"></ul>
+    </div>
 
     <script src="js/stream.js"></script>
 </body>

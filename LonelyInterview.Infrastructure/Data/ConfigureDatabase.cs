@@ -1,6 +1,4 @@
-﻿using LonelyInterview.Domain.Entities;
-using LonelyInterview.Domain.Repository;
-using LonelyInterview.Infrastructure.Data.DataSources;
+﻿using LonelyInterview.Infrastructure.Data.DataSources;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.Configuration;
@@ -32,7 +30,8 @@ public static class ConfigureDatabase
         .AddScoped<CandidateDataSource>()
         .AddScoped<HrManagerDataSource>()
         .AddScoped<LonelyInterviewUnitOfWork>()
-        .AddScoped<VacancyDataSource>();
+        .AddScoped<VacancyDataSource>()
+        .AddScoped<ResumeDataSource>();
 
 
 

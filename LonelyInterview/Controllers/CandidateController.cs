@@ -92,7 +92,7 @@ public class CandidateController(CandidateDataSource _candidateDatasource, Lonel
         }
 
         // 3. Создание нового кандидата. Временная реализация
-        var newCandidate = Candidate.Create(request.FullName, request.BirthDate, request.Speciality, request.GraduationYear, request.PhoneNumber, request.TelegramNick, request.Email, request.Password); 
+        var newCandidate = Candidate.Create(request.UserName, request.BirthDate, request.Speciality, request.GraduationYear, request.PhoneNumber, request.TelegramNick, request.Email, request.Password); 
 
         // 4. Сохранение кандидата в базе данных
         await _candidateDatasource.AddAsync(newCandidate, token);

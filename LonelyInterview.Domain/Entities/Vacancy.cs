@@ -37,6 +37,12 @@ public class Vacancy : IEntity
     public DateTime? PublishedAt { get; set; }
     public DateTime? ClosedAt { get; set; }
 
+
+    public void SetStatus(VacancyStatus status)
+    {
+        Status = status;
+    }
+
     public static Vacancy Create(
         string title,
         string description,

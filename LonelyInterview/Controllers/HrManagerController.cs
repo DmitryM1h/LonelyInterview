@@ -1,4 +1,4 @@
-using LonelyInterview.Application.Requests.Hr;
+﻿using LonelyInterview.Application.Requests.Hr;
 using LonelyInterview.Auth.Contracts;
 using LonelyInterview.Domain.Entities;
 using LonelyInterview.Infrastructure.Data;
@@ -53,46 +53,44 @@ public class HrManagerController(HrManagerDataSource _hrManagersdataSource, Lone
         var currHrId = HttpContext.User.Claims.Where(t => t.Type == ClaimTypes.NameIdentifier).First().Value;
         Guid currHrIdGuid = Guid.Parse(currHrId);
 
-        var vacancy = await _vacancyDataSource.GetByIdAsync(vacancyId, token);
+        var vacancy = await _vacancyDataSource.GetByIdOrDefaultAsync(vacancyId, token);
 
         if (vacancy == null)
         {
             return NotFound("Vacancy not found.");
         }
 
-           // Проверка, что текущий HR является создателем вакансии.
-           if (vacancy.CreatedBy.Id != currHrIdGuid)
-            {
-                return Forbid("You are not authorized to close this vacancy. Only the creator can close it.");
-            }
-
-        if (!vacancy.isActive)
+        if (vacancy.ResponsibleHr.Id != currHrIdGuid)
         {
-            return BadRequest("Vacancy is already closed.");
+            return Forbid("Access denied");
         }
 
-        vacancy.isActive = false; // Закрываем вакансию.
+        if (vacancy.Status == VacancyStatus.Closed)
+        {
+            return Ok();
+        }
+
+        vacancy.SetStatus(VacancyStatus.Closed);
+
         await _unitOfWork.SaveAsync(token);
 
 
-        return Ok("Vacancy closed successfully.");
+        return Ok();
     }
 
 
-    [HttpGet("VacanciesCreatedByMe")]
+    [HttpGet("HrManagersVacancies")]
     [Authorize(Roles = nameof(Role.HrManager))]
-    public async Task<ActionResult<IEnumerable<Vacancy>>> GetVacanciesCreatedByMe(CancellationToken token = default)
+    public async Task<ActionResult<IEnumerable<Vacancy>>> GetHrManagersVacancies(CancellationToken token = default)
     {
         var currHrId = HttpContext.User.Claims.Where(t => t.Type == ClaimTypes.NameIdentifier).First().Value;
+
+        if (currHrId is null)
+            return Unauthorized();
+
         Guid currHrIdGuid = Guid.Parse(currHrId);
 
-        var hrManager = await _hrManagersdataSource.GetByIdAsync(currHrIdGuid, token);
-        if (hrManager == null)
-        {
-            return NotFound("HrManager not found.");
-        }
-
-        var vacancies = await _vacancyDataSource.Get(x => x.CreatedBy.Id == currHrIdGuid).ToListAsync(token); // Получаем вакансии, созданные текущим HR
+        var vacancies = await _vacancyDataSource.GetVacanciesByHrIdAsync(currHrIdGuid, token);
 
         return Ok(vacancies);
     }

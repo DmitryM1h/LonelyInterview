@@ -22,15 +22,6 @@ public class Candidate : IEntity
         _resumes.Add(resume);
     }
 
-    public void AddInfo(CandidateInfo info)
-    {
-        if (Info is null)
-        {
-            Info = info;
-        }
-
-    }
-
     public void UpdateInfo(CandidateInfo info)
     {
 
@@ -51,7 +42,7 @@ public class Candidate : IEntity
     {
         var candidate = new Candidate() { Id = id};
         if (info is not null)
-            candidate.AddInfo(info);
+            candidate.Info = info;
         return candidate;
     }
 

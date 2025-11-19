@@ -45,13 +45,7 @@ namespace LonelyInterview.Auth
                         },
                         OnMessageReceived = context =>
                         {
-                            //var accessToken = context.Request.Headers["Authorization"].FirstOrDefault();
-                            //if (!string.IsNullOrEmpty(accessToken) && accessToken.StartsWith("Bearer "))
-                            //{
-                            //    context.Token = accessToken.Substring("Bearer ".Length);
-                            //    Console.WriteLine($"✅ JWT token extracted from Authorization header");
-                            //    return Task.CompletedTask;
-                            //}
+                          
 
                             var accessToken = context.Request.Query["access_token"];
                             var path = context.HttpContext.Request.Path;

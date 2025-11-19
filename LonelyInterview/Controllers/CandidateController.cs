@@ -1,4 +1,4 @@
-﻿using LonelyInterview.Auth.Contracts;
+using LonelyInterview.Auth.Contracts;
 using LonelyInterview.Domain.Entities;
 using LonelyInterview.Application.Requests.Candidate;
 using LonelyInterview.Infrastructure.Data.DataSources;
@@ -10,20 +10,29 @@ namespace LonelyInterview.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CandidateController(CandidateDataSource _candidateDatasource, LonelyInterviewUnitOfWork _unitOfWork
-        ,VacancyDataSource _vacancyDatasource) : ControllerBase
+    public class CandidateController(CandidateDataSource _candidateDatasource, LonelyInterviewUnitOfWork _unitOfWork, VacancyDataSource _vacancyDatasource) : ControllerBase
     {
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Candidate>>> GetAllCandidates()
         {
-           var candidates = await _candidateDatasource.GetAllAsync();
+            var candidates = await _candidateDatasource.GetAllAsync();
             return Ok(candidates);
         }
 
         [HttpPost("UpdateInfo")]
+        [Authorize(Roles = nameof(Role.Candidate))]
         public async Task<ActionResult> UpdateInfo([FromBody] UpdateCandidatesInfoRequest updRequest, CancellationToken token = default)
         {
+            var currentUserId = HttpContext.User.Claims.Where(t => t.Type == ClaimTypes.NameIdentifier).First().Value; 
+            Guid currentUserIdGuid = Guid.Parse(currentUserId);
+
+            // Проверяем, что CandidateId из запроса соответствует ID текущего пользователя
+            if (updRequest.CandidateId != currentUserIdGuid)
+            {
+                return Forbid("You are not authorized to update information for other candidates.");
+            }
+
             var cand = await _candidateDatasource.GetCandidateWithInfo(updRequest.CandidateId, token);
             if (cand == null)
                 return BadRequest("Candidate was not found");

@@ -16,8 +16,6 @@ public class HrManager : IEntity
 
     public void CreateVacancy(Vacancy vacancy)
     {
-        //TODO Validation
-
         _vacancies.Add(vacancy);
     }
 

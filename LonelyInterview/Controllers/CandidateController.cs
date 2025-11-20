@@ -28,7 +28,7 @@ public class CandidateController(
     [Authorize(Roles = nameof(Role.Candidate))]
     public async Task<ActionResult> UpdateInfo([FromBody] UpdateCandidatesInfoRequest updRequest, CancellationToken token = default)
     {
-        var candidateId = HttpContext.User.Claims.Where(t => t.Type == ClaimTypes.NameIdentifier).First().Value;
+        var candidateId = HttpContext.User.Claims.First(t => t.Type == ClaimTypes.NameIdentifier).Value;
 
         var cand = await _candidateDatasource.GetCandidateWithInfo(Guid.Parse(candidateId), token);
 

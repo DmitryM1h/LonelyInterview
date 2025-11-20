@@ -7,8 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace LonelyInterview.Application.Interview
 {
-    // [Authorize(Roles = nameof(Role.Candidate))]
-    [Authorize]
+    [Authorize(Roles = nameof(Role.Candidate))]
     public class InterviewHub : Hub
     {
 

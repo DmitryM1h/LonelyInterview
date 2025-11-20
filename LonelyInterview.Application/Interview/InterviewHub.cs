@@ -8,16 +8,15 @@ using Microsoft.AspNetCore.SignalR;
 namespace LonelyInterview.Application.Interview
 {
     [Authorize(Roles = nameof(Role.Candidate))]
-    public class InterviewHub : Hub
+    public class InterviewHub(AudioInterviewSession session) : Hub
     {
-
         public override async Task OnConnectedAsync()
         {
             Console.WriteLine($"Соединение установлено: {Context.ConnectionId}");
 
             var connectionId = Context.UserIdentifier ?? Context.ConnectionId;
-
-            //userSession.StartSession(connectionId);
+            
+            session.StartSession(connectionId);
 
             await base.OnConnectedAsync();
         }
@@ -26,8 +25,8 @@ namespace LonelyInterview.Application.Interview
         {
             Console.WriteLine($"Соединение разорвано: {Context.ConnectionId}");
 
-           // userSession.CompleteSession();
-
+            session.CompleteSession();
+            
             return base.OnDisconnectedAsync(exception);
         }
 
@@ -36,9 +35,10 @@ namespace LonelyInterview.Application.Interview
 
             await foreach (var audioChunk in audioStream)
             {
-                Console.WriteLine(audioChunk);
+                Console.WriteLine("Received in hub endpoint");
                 //TODO отлавливание ошибок и retry + оповещение кандидата о том, что система тормозит
-                //await userSession.ReceiveData(audioChunk);
+                
+                await session.ReceiveData(audioChunk);
 
             }
             Console.WriteLine("Audio stream completed");

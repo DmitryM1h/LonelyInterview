@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using LonelyInterview.Application.Interview;
 
 namespace LonelyInterview.Application
 {
@@ -14,7 +15,8 @@ namespace LonelyInterview.Application
         {
             services.AddScoped<AuthService>();
             services.AddSignalR();
-            
+            services.AddScoped<AudioInterviewSession>();
+
         }
           
         

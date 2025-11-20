@@ -21,7 +21,13 @@ public class AudioInterviewSession
     public AudioInterviewSession(/*LLMClient llmClient*/)
     {
         _CancellationToken = new CancellationTokenSource();
-        _CancellationToken.Token.Register(CompleteSession);
+        Console.WriteLine("contructor session");
+        _CancellationToken.Token.Register(() =>
+        {
+            Console.WriteLine("Token has been cancelled");
+        });
+
+        _ = RunBackground();
         //_llmClient = llmClient;
     }
 
@@ -40,29 +46,34 @@ public class AudioInterviewSession
     //    }
     //}
 
-    public async Task ProcessDataAsync()
+    private async Task ProcessDataAsync()
     {
-        await foreach (var chunk in _incomingSpeech.Reader.ReadAllAsync(_CancellationToken.Token))
+
+         Console.WriteLine("Background started");
+         await foreach (var chunk in _incomingSpeech.Reader.ReadAllAsync())
         {
             Console.WriteLine($"Received audio chunk of {chunk.Length} bytes at {DateTime.Now:HH:mm:ss.fff}");
-
+    
             var audioData = Convert.FromBase64String(chunk);
-
+    
             // отправка к LLM
-
+    
         }
+         Console.WriteLine("Background ended");
     }
 
     public void CompleteSession()
     {
         _incomingSpeech.Writer.Complete();
+        _CancellationToken.Cancel();
+
     }
 
 
     public void StartSession(string userId)
     {
         UserId = userId;
-        _ = RunBackground();
+        //_ = RunBackground();
         //_llmClient.SetChannel(_incomingSpeech);
 
         //_ = Task.Run(_llmClient.StreamAudioAsync);
@@ -80,6 +91,7 @@ public class AudioInterviewSession
             }
             catch (Exception ex)
             {
+                Console.WriteLine("Background failed");
                 await _CancellationToken.CancelAsync();
                 _Exception = ex;
             }

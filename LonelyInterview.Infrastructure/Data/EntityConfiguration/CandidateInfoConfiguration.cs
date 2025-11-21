@@ -9,22 +9,22 @@ using System.Threading.Tasks;
 
 namespace LonelyInterview.Infrastructure.Data.EntityConfiguration;
 
-internal class CandidateInfoConfiguration : IEntityTypeConfiguration<CandidateInfo>
-{
-    public void Configure(EntityTypeBuilder<CandidateInfo> builder)
-    {
-        builder
-            .HasKey(x => x.Id);
+//internal class CandidateInfoConfiguration : IEntityTypeConfiguration<CandidateInfo>
+//{
+//    public void Configure(EntityTypeBuilder<CandidateInfo> builder)
+//    {
+//        builder
+//            .HasKey(x => x.Id);
 
-        builder
-            .Property(t => t.Id)
-            .ValueGeneratedNever();
+//        builder
+//            .Property(t => t.Id)
+//            .ValueGeneratedNever();
 
-        builder
-            .HasOne(t => t.Candidate)
-            .WithOne(t => t.Info)
-            .HasForeignKey<Candidate>()
-            .OnDelete(DeleteBehavior.Cascade)
-            .IsRequired(false);
-    }
-}
+//        builder
+//            .HasOne(t => t.Candidate)
+//            .WithOne(t => t.Info)
+//            .HasForeignKey<Candidate>()
+//            .OnDelete(DeleteBehavior.Cascade)
+//            .IsRequired(false);
+//    }
+//}

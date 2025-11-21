@@ -10,7 +10,7 @@ public class LonelyInterviewContext : DbContext
 
 
     public DbSet<Candidate> Candidates { get; set; }
-    public DbSet<CandidateInfo> CandidatesInfo { get; set; }
+    //public DbSet<CandidateInfo> CandidatesInfo { get; set; }
     public DbSet<HrManager> HrManagers { get; set; }
     public DbSet<Resume> Resumes { get; set; }
     public DbSet<Vacancy> Vacancies { get; set; }

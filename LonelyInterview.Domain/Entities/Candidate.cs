@@ -13,7 +13,7 @@ public class Candidate : IEntity
     public IReadOnlyCollection<Resume>? Resumes => _resumes.AsReadOnly();
 
 
-    public CandidateInfo? Info { get; private set; }
+    public CandidateInfo Info { get; private set; }
 
     public void AddResume(Resume resume)
     {
@@ -25,7 +25,7 @@ public class Candidate : IEntity
 
         if (Info is null)
         {
-            var candInfo = CandidateInfo.Create(info.Id, info.Specialty, info.Degree, info.GraduationYear, info.WorkExperience);
+            var candInfo = CandidateInfo.Create(/*info.Id,*/ info.Specialty, info.Degree, info.GraduationYear, info.WorkExperience);
             Info = candInfo;
             return;
         }

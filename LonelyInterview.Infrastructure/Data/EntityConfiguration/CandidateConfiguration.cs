@@ -17,6 +17,9 @@ internal class CandidateConfiguration : IEntityTypeConfiguration<Candidate>
             .ValueGeneratedNever();
 
         builder
+            .OwnsOne(t => t.Info);
+
+        builder
             .HasMany(x => x.Resumes)
             .WithOne(t => t.Candidate)
             .OnDelete(DeleteBehavior.Cascade)

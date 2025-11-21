@@ -7,7 +7,6 @@ namespace LonelyInterview.Domain.Entities;
 public class Candidate : IEntity
 {
     public Guid Id { get; private set; }
-    //TODO Денормализация XD
 
     private List<Resume> _resumes = new List<Resume>();
     public IReadOnlyCollection<Resume>? Resumes => _resumes.AsReadOnly();

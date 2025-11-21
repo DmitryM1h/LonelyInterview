@@ -27,7 +27,6 @@ public class AudioInterviewSession
         ThrowIfExceptionHappened();
         await _incomingSpeech.Writer.WaitToWriteAsync(token); // На случай, если не будем успевать обрабатывать поток данных вовремя
         await _incomingSpeech.Writer.WriteAsync(data, token);
-        _incomingSpeech.Writer.Complete();
 
     }
 
@@ -42,9 +41,13 @@ public class AudioInterviewSession
     public void StartSession(string userId, CancellationToken token)
     {
         UserId = userId;
-        _llmClient.SetConnection(_incomingSpeech, token);
+        _llmClient.SetConnection(_incomingSpeech, userId, token);
     }
-
+    
+    public void CompleteSession()
+    {
+        _incomingSpeech.Writer.Complete();
+    }
 
 
     private void ThrowIfExceptionHappened()

@@ -15,7 +15,9 @@ public class LLMClient(AudioSession.AudioSessionClient client) : AudioSession.Au
     private readonly Channel<byte[]> _modelReplies = Channel.CreateBounded<byte[]>(BUFFER_SIZE);
     public Exception? ClientException { get; private set; }
 
-    public void SetConnection(ChannelReader<byte[]> reader, CancellationToken token)
+    private string userId = null!;
+
+    public void SetConnection(ChannelReader<byte[]> reader, string userId, CancellationToken token)
     {
         _incomingSpeech = reader;
 

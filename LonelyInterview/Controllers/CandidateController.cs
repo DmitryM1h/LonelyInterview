@@ -30,14 +30,14 @@ public class CandidateController(
     {
         var candidateId = HttpContext.User.Claims.First(t => t.Type == ClaimTypes.NameIdentifier).Value;
 
-        var cand = await _candidateDatasource.GetCandidateWithInfo(Guid.Parse(candidateId), token);
+        var candidate = await _candidateDatasource.GetCandidateWithInfo(Guid.Parse(candidateId), token);
 
-        if (cand == null)
+        if (candidate == null)
             return BadRequest("Candidate was not found");
 
-        var info = CandidateInfo.Create(cand.Id, updRequest.Specialty, updRequest.Degree, updRequest.GraduationYear, updRequest.WorkExperience);
+        var info = CandidateInfo.Create(candidate.Id, updRequest.Specialty, updRequest.Degree, updRequest.GraduationYear, updRequest.WorkExperience);
 
-        cand.UpdateInfo(info);
+        candidate.UpdateInfo(info);
         await _unitOfWork.SaveAsync(token);
         return Ok(info);
     }

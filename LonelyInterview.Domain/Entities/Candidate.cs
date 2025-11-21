@@ -25,7 +25,7 @@ public class Candidate : IEntity
 
         if (Info is null)
         {
-            var candInfo = CandidateInfo.Create(/*info.Id,*/ info.Specialty, info.Degree, info.GraduationYear, info.WorkExperience);
+            var candInfo = CandidateInfo.Create(info.Specialty, info.Degree, info.GraduationYear, info.WorkExperience);
             Info = candInfo;
             return;
         }

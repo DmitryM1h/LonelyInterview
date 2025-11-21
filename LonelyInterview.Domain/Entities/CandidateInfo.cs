@@ -2,7 +2,7 @@
 
 namespace LonelyInterview.Domain.Entities;
 
-public class CandidateInfo : IEntity
+public class CandidateInfo
 {
 
     public string? Specialty { get; private set; }
@@ -29,7 +29,6 @@ public class CandidateInfo : IEntity
 
         return new CandidateInfo
         {
-            //Id = id,
             Specialty = string.IsNullOrWhiteSpace(specialty) ? null : specialty.Trim(),
             Degree = string.IsNullOrWhiteSpace(degree) ? null : degree.Trim(),
             GraduationYear = validatedGraduationYear,

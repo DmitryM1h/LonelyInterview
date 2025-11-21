@@ -2,6 +2,7 @@
 using LonelyInterview.Application.Interview;
 using LonelyInterview.Auth;
 using LonelyInterview.Infrastructure.Data;
+using LonelyInterview.LLMIntegration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 
@@ -76,7 +77,7 @@ builder.Services.AddAuth(builder.Configuration); // Добавляем посл�
 
 builder.Services.AddApplicationServices();
 
-
+builder.Services.AddLLMClient();
 
 var app = builder.Build();
 

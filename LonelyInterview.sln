@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LonelyInterview.Auth", "Lon
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LonelyInterview.Application", "LonelyInterview.Application\LonelyInterview.Application.csproj", "{21BE0D9E-B22C-4EE9-8903-E711C58FEA88}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LonelyInterview.LLMIntegration", "LonelyInterview.LLMClient\LonelyInterview.LLMIntegration.csproj", "{F1C3D13F-55A5-4695-8676-72B738CA6F7A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{21BE0D9E-B22C-4EE9-8903-E711C58FEA88}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21BE0D9E-B22C-4EE9-8903-E711C58FEA88}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{21BE0D9E-B22C-4EE9-8903-E711C58FEA88}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1C3D13F-55A5-4695-8676-72B738CA6F7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1C3D13F-55A5-4695-8676-72B738CA6F7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1C3D13F-55A5-4695-8676-72B738CA6F7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1C3D13F-55A5-4695-8676-72B738CA6F7A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -14,9 +14,9 @@ namespace LonelyInterview.Application.Interview
         {
             Console.WriteLine($"Соединение установлено: {Context.ConnectionId}");
 
-            var connectionId = Context.UserIdentifier ?? Context.ConnectionId;
-            
-            session.StartSession(connectionId);
+            var connectionId = Context.UserIdentifier!;
+
+            session.StartSession(connectionId, Context.ConnectionAborted);
 
             await base.OnConnectedAsync();
         }
@@ -24,21 +24,20 @@ namespace LonelyInterview.Application.Interview
         public override Task OnDisconnectedAsync(Exception? exception)
         {
             Console.WriteLine($"Соединение разорвано: {Context.ConnectionId}");
-
-            session.CompleteSession();
             
             return base.OnDisconnectedAsync(exception);
         }
 
-        public async Task StartAudioStream(IAsyncEnumerable<string> audioStream)
+        public async Task StartAudioStream(IAsyncEnumerable<byte[]> audioStream)
         {
 
             await foreach (var audioChunk in audioStream)
             {
-                Console.WriteLine("Received in hub endpoint");
+                //Console.WriteLine("Received in hub endpoint");
+               // Console.WriteLine($"{audioChunk}");
                 //TODO отлавливание ошибок и retry + оповещение кандидата о том, что система тормозит
                 
-                await session.ReceiveData(audioChunk);
+                await session.ReceiveData(audioChunk, Context.ConnectionAborted);
 
             }
             Console.WriteLine("Audio stream completed");

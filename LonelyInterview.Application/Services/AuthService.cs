@@ -3,7 +3,6 @@ using LonelyInterview.Auth;
 using LonelyInterview.Domain.Entities;
 using LonelyInterview.Infrastructure.Data.DataSources;
 using Microsoft.AspNetCore.Identity;
-using System.Net;
 using System.Security.Claims;
 
 

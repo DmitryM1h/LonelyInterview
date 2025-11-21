@@ -14,15 +14,14 @@ public class AudioInterviewSession
 
     private string UserId = null!;
 
-    private readonly CancellationTokenSource _CancellationToken;
+    private readonly CancellationTokenSource _cancelationTokenSrc;
 
     private Exception? _Exception;
 
     public AudioInterviewSession(/*LLMClient llmClient*/)
     {
-        _CancellationToken = new CancellationTokenSource();
-        Console.WriteLine("contructor session");
-        _CancellationToken.Token.Register(() =>
+        _cancelationTokenSrc = new CancellationTokenSource();
+        _cancelationTokenSrc.Token.Register(() =>
         {
             Console.WriteLine("Token has been cancelled");
         });
@@ -34,8 +33,8 @@ public class AudioInterviewSession
     public async Task ReceiveData(string data)
     {
         ThrowIfExceptionHappened();
-        await _incomingSpeech.Writer.WaitToWriteAsync(_CancellationToken.Token); // На случай, если не будем успевать обрабатывать поток данных вовремя
-        await _incomingSpeech.Writer.WriteAsync(data, _CancellationToken.Token);
+        await _incomingSpeech.Writer.WaitToWriteAsync(_cancelationTokenSrc.Token); // На случай, если не будем успевать обрабатывать поток данных вовремя
+        await _incomingSpeech.Writer.WriteAsync(data, _cancelationTokenSrc.Token);
     }
 
     //public async IAsyncEnumerable<string> ModelAnswers()
@@ -48,24 +47,21 @@ public class AudioInterviewSession
 
     private async Task ProcessDataAsync()
     {
-
-         Console.WriteLine("Background started");
-         await foreach (var chunk in _incomingSpeech.Reader.ReadAllAsync())
+        await foreach (var chunk in _incomingSpeech.Reader.ReadAllAsync(_cancelationTokenSrc.Token))
         {
             Console.WriteLine($"Received audio chunk of {chunk.Length} bytes at {DateTime.Now:HH:mm:ss.fff}");
-    
+
             var audioData = Convert.FromBase64String(chunk);
-    
+
             // отправка к LLM
-    
+
         }
-         Console.WriteLine("Background ended");
     }
 
     public void CompleteSession()
     {
         _incomingSpeech.Writer.Complete();
-        _CancellationToken.Cancel();
+        _cancelationTokenSrc.Cancel();
 
     }
 
@@ -92,7 +88,7 @@ public class AudioInterviewSession
             catch (Exception ex)
             {
                 Console.WriteLine("Background failed");
-                await _CancellationToken.CancelAsync();
+                await _cancelationTokenSrc.CancelAsync();
                 _Exception = ex;
             }
         });

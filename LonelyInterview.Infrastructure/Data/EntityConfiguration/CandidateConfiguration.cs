@@ -1,4 +1,4 @@
-﻿using LonelyInterview.Domain.Entities;
+﻿using LonelyInterview.Domain.Models;
 using LonelyInterview.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

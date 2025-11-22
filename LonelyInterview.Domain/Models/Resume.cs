@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 
 
-namespace LonelyInterview.Domain.Entities;
+namespace LonelyInterview.Domain.Models;
 
 public class Resume : IEntity
 {

@@ -3,7 +3,7 @@
 
 using LonelyInterview.Domain.Interfaces;
 
-namespace LonelyInterview.Domain.Entities;
+namespace LonelyInterview.Domain.Models;
 
 public class HrManager : IEntity
 {

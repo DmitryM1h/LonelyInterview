@@ -1,5 +1,5 @@
 ﻿using LonelyInterview.Auth.Contracts;
-using LonelyInterview.Domain.Entities;
+using LonelyInterview.Domain.Models;
 using LonelyInterview.Application.Requests.Candidate;
 using LonelyInterview.Infrastructure.Data.DataSources;
 using Microsoft.AspNetCore.Authorization;

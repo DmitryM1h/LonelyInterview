@@ -15,7 +15,6 @@ namespace LonelyInterview.Application
                 options.MaximumReceiveMessageSize = 1024 * 1024;
                 options.StreamBufferCapacity = 1024;
             });
-            services.AddScoped<AudioInterviewSession>();
 
         }
           

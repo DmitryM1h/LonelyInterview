@@ -1,8 +1,9 @@
 ﻿
+using Google.Protobuf;
 using Grpc.Core;
 using LonelyInterviewAudioSession;
+using System.Runtime.ExceptionServices;
 using System.Threading.Channels;
-using Google.Protobuf;
 
 namespace LonelyInterview.LLMIntegration;
 
@@ -10,20 +11,21 @@ public class LLMClient(AudioSession.AudioSessionClient client) : AudioSession.Au
 {
     private const int BUFFER_SIZE = 50;
 
-    private ChannelReader<byte[]> _incomingSpeech = null!;
-
+    private readonly Channel<byte[]> _incomingSpeech = Channel.CreateBounded<byte[]>(BUFFER_SIZE);
+  
     private readonly Channel<byte[]> _modelReplies = Channel.CreateBounded<byte[]>(BUFFER_SIZE);
-    public Exception? ClientException { get; private set; }
 
-    private string userId = null!;
+    private Exception? _exception;
+
+    private string candidateId = null!;
+
 
 
     public IAsyncEnumerable<byte[]> GetModelReplies() => _modelReplies.Reader.ReadAllAsync();
 
-    public void SetConnection(ChannelReader<byte[]> reader, string userId, CancellationToken token)
+    public void SetConnection(string userId, CancellationToken token)
     {
-        _incomingSpeech = reader;
-
+        candidateId = userId;
         _ = RunBackground(token);
 
     }
@@ -38,9 +40,19 @@ public class LLMClient(AudioSession.AudioSessionClient client) : AudioSession.Au
             catch (Exception ex)
             {
                 Console.WriteLine("Background failed");
-                ClientException = ex;
+                _exception = ex;
             }
         }, token);
+    }
+
+
+    public async Task ReceiveAudioAsync(byte[] data, CancellationToken token)
+    {
+     
+        ThrowIfExceptionHappened();
+        await _incomingSpeech.Writer.WaitToWriteAsync(token); // На случай, если не будем успевать обрабатывать поток данных вовремя
+        await _incomingSpeech.Writer.WriteAsync(data, token);
+       
     }
 
     public async Task StreamAudioAsync(CancellationToken token)
@@ -58,12 +70,14 @@ public class LLMClient(AudioSession.AudioSessionClient client) : AudioSession.Au
             }
         }, token);
 
-        await foreach (var message in _incomingSpeech.ReadAllAsync())
-        {
-            Console.WriteLine(message);
 
-            await call.RequestStream.WriteAsync(new AudioChunkRequest { CandidateId = userId, AudioData = ByteString.CopyFrom(message) });
-            await Task.Delay(2000, token);
+        await _incomingSpeech.Reader.WaitToReadAsync(token);
+
+        await foreach (var message in _incomingSpeech.Reader.ReadAllAsync(token))
+        {
+            Console.WriteLine("Звук считан из канала");
+
+            await call.RequestStream.WriteAsync(new AudioChunkRequest { CandidateId = candidateId, AudioData = ByteString.CopyFrom(message) });
         }
 
         await call.RequestStream.CompleteAsync();
@@ -71,6 +85,13 @@ public class LLMClient(AudioSession.AudioSessionClient client) : AudioSession.Au
 
     }
 
-
+    private void ThrowIfExceptionHappened()
+    {
+        if (_exception is not null)
+        {
+            Console.WriteLine("Ошибка background " + _exception.Message);
+            ExceptionDispatchInfo.Throw(_exception);
+        }
+    }
 
 }

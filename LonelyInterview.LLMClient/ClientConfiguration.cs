@@ -10,7 +10,7 @@ public static class ClientConfiguration
     {
         services.AddGrpcClient<AudioSession.AudioSessionClient>(options =>
         {
-            options.Address = new Uri("https://python-llm-service:50051");
+            options.Address = new Uri("http://localhost:50051");
         });
 
         services.AddScoped<LLMClient>();

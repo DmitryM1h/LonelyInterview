@@ -41,7 +41,6 @@ public class AudioInterviewSession
     public void StartSession(string userId, CancellationToken token)
     {
         UserId = userId;
-        _llmClient.SetConnection(_incomingSpeech, userId, token);
     }
     
     public void CompleteSession()
@@ -53,7 +52,10 @@ public class AudioInterviewSession
     private void ThrowIfExceptionHappened()
     {
         if (_llmClient.ClientException is not null)
+        {
+            Console.WriteLine("Ошибка!!" +  _llmClient.ClientException.Message);
             ExceptionDispatchInfo.Throw(_llmClient.ClientException);
+        }
     }
 
 }

@@ -17,6 +17,9 @@ public class LLMClient(AudioSession.AudioSessionClient client) : AudioSession.Au
 
     private string userId = null!;
 
+
+    public IAsyncEnumerable<byte[]> GetModelReplies() => _modelReplies.Reader.ReadAllAsync();
+
     public void SetConnection(ChannelReader<byte[]> reader, string userId, CancellationToken token)
     {
         _incomingSpeech = reader;
@@ -51,6 +54,7 @@ public class LLMClient(AudioSession.AudioSessionClient client) : AudioSession.Au
             {
                 Console.WriteLine($"Server: {response.AudioData}");
                 byte[] audioBytes = response.AudioData.ToByteArray();
+                await _modelReplies.Writer.WriteAsync(audioBytes);
             }
         }, token);
 
@@ -58,7 +62,7 @@ public class LLMClient(AudioSession.AudioSessionClient client) : AudioSession.Au
         {
             Console.WriteLine(message);
 
-            await call.RequestStream.WriteAsync(new AudioChunkRequest { CandidateId = "kek", AudioData = ByteString.CopyFrom(message) });
+            await call.RequestStream.WriteAsync(new AudioChunkRequest { CandidateId = userId, AudioData = ByteString.CopyFrom(message) });
             await Task.Delay(2000, token);
         }
 
@@ -67,7 +71,6 @@ public class LLMClient(AudioSession.AudioSessionClient client) : AudioSession.Au
 
     }
 
-    public IAsyncEnumerable<byte[]> GetModelReplies() => _modelReplies.Reader.ReadAllAsync();
 
 
 }

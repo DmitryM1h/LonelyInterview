@@ -1,6 +1,7 @@
-﻿using LonelyInterview.Application.Services;
+﻿using LonelyInterview.Application.Interview;
+using LonelyInterview.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
-using LonelyInterview.Application.Interview;
+using Microsoft.Extensions.Options;
 
 namespace LonelyInterview.Application
 {
@@ -9,7 +10,11 @@ namespace LonelyInterview.Application
         public static void AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<AuthService>();
-            services.AddSignalR();
+            services.AddSignalR(options =>
+            {
+                options.MaximumReceiveMessageSize = 1024 * 1024;
+                options.StreamBufferCapacity = 1024;
+            });
             services.AddScoped<AudioInterviewSession>();
 
         }

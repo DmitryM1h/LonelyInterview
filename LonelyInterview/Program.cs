@@ -90,16 +90,6 @@ if (app.Environment.IsDevelopment())
 }
 
 
-//app.Use(async (ctx, next) =>
-//{
-//    Console.WriteLine($"➡️ Incoming Request: {ctx.Request.Method} {ctx.Request.Path}");
-//    Console.WriteLine($"Authorization Header: {ctx.Request.Headers.Authorization}");
-
-//    await next();
-
-//    Console.WriteLine($"⬅️ Response: {ctx.Response.StatusCode}");
-//});
-
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();

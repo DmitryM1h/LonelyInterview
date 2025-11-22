@@ -15,7 +15,6 @@ namespace LonelyInterview.Application.Interview
             Console.WriteLine($"Соединение установлено: {Context.ConnectionId}");
 
             var connectionId = Context.UserIdentifier!;
-
             session.StartSession(connectionId, Context.ConnectionAborted);
 
             await base.OnConnectedAsync();
@@ -39,18 +38,20 @@ namespace LonelyInterview.Application.Interview
                 
                 await session.ReceiveData(audioChunk, Context.ConnectionAborted);
 
+
             }
             Console.WriteLine("Audio stream completed");
         }
 
         public async Task ReceiveModelAnswers()
         {
-            //await foreach (var reply in userSession.ModelAnswers())
-            //{
-            //    // Озвучка ????
+            await foreach (var reply in session.ModelAnswers())
+            {
+                // Озвучка ????
 
-            //    await Clients.Caller.SendAsync(reply);
-            //}
+                string base64Audio = Convert.ToBase64String(reply);
+                await Clients.Caller.SendAsync(base64Audio);
+            }
         }
 
 

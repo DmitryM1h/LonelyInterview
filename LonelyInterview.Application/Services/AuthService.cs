@@ -20,8 +20,6 @@ namespace LonelyInterview.Application.Services
         HrManagerDataSource _hrManagerRepo,
         LonelyInterviewUnitOfWork _unitOfWork)
     {
-
-   
         public async Task<Result<string>> LoginAsync(LoginDto logDto)
         {
             var user = await userManager.FindByEmailAsync(logDto.Email);

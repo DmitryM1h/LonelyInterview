@@ -55,6 +55,11 @@ public class LLMClient(AudioSession.AudioSessionClient client) : AudioSession.Au
        
     }
 
+    public async Task ReceiveCandidatesCodeAsync(string code, string candId, CancellationToken token)
+    {
+        await client.SubmitCodeAsync(new CodeSubmissionRequest() { CandidateId = candId, Code = code}, cancellationToken: token);
+    }
+
     public async Task StreamAudioAsync(CancellationToken token)
     {
 

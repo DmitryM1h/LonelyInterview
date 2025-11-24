@@ -84,6 +84,20 @@ function setupConnectionHandlers() {
         document.getElementById("connectionStatus").textContent = "Connected";
         document.getElementById("connectionStatus").className = "connected";
     });
+
+    // НОВЫЕ ОБРАБОТЧИКИ ДЛЯ ЧАТА
+    connection.on("AudioProcessingDelay", (data) => {
+        addChatMessage(`⚠️ ${data.Message}`, 'system-message');
+        addMessage(`Server warning: ${data.Message}`, 'info-message');
+    });
+
+    connection.on("CodeSubmitted", (data) => {
+        addChatMessage(`✅ ${data.Message}`, 'system-message');
+    });
+
+    connection.on("CodeError", (data) => {
+        addChatMessage(`❌ Ошибка: ${data.Error}`, 'error-message');
+    });
 }
 
 // Функция логина
@@ -262,6 +276,52 @@ function addMessage(text, className) {
     document.getElementById('messagesList').appendChild(li);
 }
 
+// Функции для чата кода
+function addChatMessage(message, type = 'user-message') {
+    const chatMessages = document.getElementById('chatMessages');
+    if (!chatMessages) return;
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+
+    const timestamp = document.createElement('div');
+    timestamp.className = 'timestamp';
+    timestamp.textContent = new Date().toLocaleTimeString();
+
+    const content = document.createElement('div');
+    content.textContent = message;
+
+    messageDiv.appendChild(timestamp);
+    messageDiv.appendChild(content);
+    chatMessages.appendChild(messageDiv);
+
+    // Автопрокрутка вниз
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function addCodeMessage(code, type = 'code-message') {
+    const chatMessages = document.getElementById('chatMessages');
+    if (!chatMessages) return;
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+
+    const timestamp = document.createElement('div');
+    timestamp.className = 'timestamp';
+    timestamp.textContent = new Date().toLocaleTimeString();
+
+    const content = document.createElement('div');
+    content.textContent = code;
+    content.style.whiteSpace = 'pre-wrap';
+    content.style.fontFamily = 'Courier New, monospace';
+
+    messageDiv.appendChild(timestamp);
+    messageDiv.appendChild(content);
+    chatMessages.appendChild(messageDiv);
+
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
 // Обработчик кнопки Start Recording - ВЫЗЫВАЕТ МЕТОД ХАБА
 document.getElementById("startRecording").addEventListener("click", (event) => __awaiter(this, void 0, void 0, function* () {
     if (connection.state !== signalR.HubConnectionState.Connected) {
@@ -369,6 +429,57 @@ document.getElementById("uploadButton").addEventListener("click", (event) => __a
     event.preventDefault();
 }));
 
+// Обработчик отправки кода
+document.getElementById("sendCodeBtn").addEventListener("click", (event) => __awaiter(this, void 0, void 0, function* () {
+    event.preventDefault();
+
+    const codeInput = document.getElementById("codeInput");
+    const code = codeInput.value.trim();
+
+    if (!code) {
+        addChatMessage("Пожалуйста, введите код", 'system-message');
+        return;
+    }
+
+    if (connection.state !== signalR.HubConnectionState.Connected) {
+        addChatMessage("Нет соединения с сервером", 'error-message');
+        return;
+    }
+
+    try {
+        // Добавляем код в чат
+        addCodeMessage(code, 'user-message');
+        addChatMessage("Отправка кода на сервер...", 'system-message');
+
+        // ВЫЗОВ МЕТОДА ХАБА SubmitCode
+        yield connection.invoke("SubmitCode", code);
+
+        addChatMessage("Код успешно отправлен!", 'system-message');
+
+        // Очищаем поле ввода
+        codeInput.value = "";
+
+    } catch (e) {
+        console.error("❌ Error submitting code:", e);
+        addChatMessage(`Ошибка отправки кода: ${e.toString()}`, 'error-message');
+    }
+}));
+
+// Обработчик очистки кода
+document.getElementById("clearCodeBtn").addEventListener("click", (event) => {
+    event.preventDefault();
+    document.getElementById("codeInput").value = "";
+    addChatMessage("Поле ввода очищено", 'system-message');
+});
+
+// Обработчик клавиши Enter в поле кода (Ctrl+Enter для отправки)
+document.getElementById("codeInput").addEventListener("keydown", (event) => {
+    if (event.ctrlKey && event.key === 'Enter') {
+        event.preventDefault();
+        document.getElementById("sendCodeBtn").click();
+    }
+});
+
 // Обработчики событий
 document.addEventListener("DOMContentLoaded", () => {
     // Обработчик логина
@@ -391,6 +502,9 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
         logout();
     });
+
+    // Добавляем приветственное сообщение в чат
+    addChatMessage("Добро пожаловать! Введите ваш код в поле ниже и нажмите 'Отправить код' или Ctrl+Enter", 'system-message');
 
     // Инициализация приложения
     initializeApp();

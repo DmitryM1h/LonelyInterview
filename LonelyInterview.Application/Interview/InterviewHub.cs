@@ -4,31 +4,60 @@ using LonelyInterview.Auth.Contracts;
 using LonelyInterview.LLMIntegration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 namespace LonelyInterview.Application.Interview
 {
     [Authorize(Roles = nameof(Role.Candidate))]
-    public class InterviewHub(LLMClient client) : Hub
+    public class InterviewHub(LLMClient client, ILogger<InterviewHub> _logger) : Hub
     {
- 
-    
         public async Task StartAudioStream(IAsyncEnumerable<byte[]> audioStream)
         {
             var connectionId = Context.UserIdentifier!;
 
             client.SetConnection(connectionId, Context.ConnectionAborted);
 
-            await foreach (var audioChunk in audioStream)
+            try
             {
-                //Console.WriteLine("Received in hub endpoint");
-                // Console.WriteLine($"{audioChunk}");
-                //TODO отлавливание ошибок и retry + оповещение кандидата о том, что система тормозит
+                await foreach (var audioChunk in audioStream)
+                {
+                    await client.ReceiveAudioAsync(audioChunk, Context.ConnectionAborted);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Ошибка LLMClient " + ex.ToString());
 
-                await client.ReceiveAudioAsync(audioChunk, Context.ConnectionAborted);
-
-
+                await Clients.Caller.SendAsync("AudioProcessingDelay", new
+                {
+                    Message = "Временные задержки в обработке аудио",
+                    Severity = "warning",
+                    Timestamp = DateTime.UtcNow
+                });
             }
         }
+
+        public async Task SubmitCode(string code)
+        {
+            var connectionId = Context.UserIdentifier!;
+
+            try
+            {
+                await client.ReceiveCandidatesCodeAsync(code, connectionId ,Context.ConnectionAborted);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Ошибка LLMClient " + ex.ToString());
+
+                await Clients.Caller.SendAsync("AudioProcessingDelay", new
+                {
+                    Message = "Временные задержки в обработке аудио",
+                    Severity = "warning",
+                    Timestamp = DateTime.UtcNow
+                });
+            }
+        }
+        
 
         public async Task ReceiveModelAnswers()
         {

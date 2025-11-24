@@ -70,6 +70,64 @@
         .hidden {
             display: none;
         }
+
+        /* Стили для чата кода */
+        #codeChat {
+            margin: 20px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #f8f9fa;
+        }
+
+        #chatMessages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: white;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+        }
+
+        #codeInput {
+            width: 100%;
+            height: 120px;
+            font-family: 'Courier New', monospace;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        .message {
+            margin: 8px 0;
+            padding: 8px;
+            border-radius: 4px;
+        }
+
+        .user-message {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+
+        .system-message {
+            background-color: #f3e5f5;
+            border-left: 4px solid #9c27b0;
+        }
+
+        .code-message {
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9800;
+            font-family: 'Courier New', monospace;
+        }
+
+        .timestamp {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 4px;
+        }
     </style>
 </head>
 <body>
@@ -96,6 +154,17 @@
 
         <div id="audioVisualization">
             <canvas id="visualizer" width="400" height="100" style="border: 1px solid #ccc;"></canvas>
+        </div>
+
+        <!-- НОВЫЙ ЧАТ ДЛЯ КОДА -->
+        <div id="codeChat">
+            <h3>💻 Code Chat</h3>
+            <div id="chatMessages"></div>
+            <div>
+                <textarea id="codeInput" placeholder="Введите ваш код здесь..."></textarea>
+                <button id="sendCodeBtn">Отправить код</button>
+                <button id="clearCodeBtn">Очистить</button>
+            </div>
         </div>
 
         <h3>Messages:</h3>

@@ -17,8 +17,18 @@ message AudioChunkResponse {
   bytes audio_data = 2;      
 }
 
+message CodeSubmissionRequest {
+  string candidate_id = 1;
+  string code = 2;
+}
+message EmptyResponse {}
+
+
 service AudioSession
 {
 	rpc DataStream (stream AudioChunkRequest) returns (stream AudioChunkResponse);
+
+	rpc SubmitCode (CodeSubmissionRequest) returns (EmptyResponse);
+
 }
 

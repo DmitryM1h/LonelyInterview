@@ -2,9 +2,11 @@
 using LonelyInterview.Application.Interview;
 using LonelyInterview.Auth;
 using LonelyInterview.Infrastructure.Data;
+using LonelyInterview.Infrastructure.Data.Converters;
 using LonelyInterview.LLMIntegration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +16,11 @@ builder.Logging.AddDebug();
 builder.Logging.SetMinimumLevel(LogLevel.Debug);
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+     .AddJsonOptions(options =>
+     {
+         options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+     }); ;
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -47,13 +53,16 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
+    options.AddPolicy(name: "AllowSpecificOrigin",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:5173")
+                   .AllowAnyHeader()
+                   .AllowAnyMethod()
+                   .AllowCredentials();
+        });
 });
+
 builder.Services.AddDatabaseContext(builder.Configuration);
 builder.Services.AddDatabaseUserContext(builder.Configuration);
 builder.Services.AddDataSources();
@@ -82,6 +91,8 @@ builder.Services.AddLLMClient();
 var app = builder.Build();
 
 
+await AddDefaultRoles();
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -93,7 +104,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
-app.UseCors("AllowAll");
+app.UseCors("AllowSpecificOrigin");
 
 
 app.UseRouting();
@@ -146,3 +157,26 @@ app.MapControllers();
 
 
 app.Run();
+
+
+async Task AddDefaultRoles()
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+
+        string[] roles = new string[] { "Candidate", "HrManager", "Administrator" };
+
+        foreach (var roleName in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(roleName))
+            {
+                var role = new IdentityRole<Guid>(roleName);
+                var result = await roleManager.CreateAsync(role);
+
+            }
+        }
+    }
+
+}
+

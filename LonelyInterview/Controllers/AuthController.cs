@@ -23,7 +23,6 @@ namespace LonelyInterview.Controllers
                 return BadRequest(Result.error);
 
             var token = Result.result;
-            //HttpContext.Response.Cookies.Append("JWT", token!);
 
 
             return Ok(token);
@@ -37,9 +36,9 @@ namespace LonelyInterview.Controllers
 
             var result = await _authService.RegisterCandidateAsync(regRequest, token);
 
-            if (!result.isSuccess) return BadRequest(result.error);
+            if (!result.isSuccess) return BadRequest(new { result.error });
 
-            return Ok();
+            return Ok(new { message = "Регистрация кандидата прошла успешно." });
         }
 
 
@@ -51,7 +50,7 @@ namespace LonelyInterview.Controllers
 
             if (!result.isSuccess) return BadRequest(result.error);
 
-            return Ok();
+            return Ok(new { message = "Регистрация HR прошла успешно." });
         }
 
     }

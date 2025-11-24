@@ -52,7 +52,8 @@ namespace LonelyInterview.Application.Services
                                                         BirthDay: regRequest.BirthDay,
                                                         Email: regRequest.Email,
                                                         Telegram: regRequest.Telegram,
-                                                        Password: regRequest.Password
+                                                        Password: regRequest.Password,
+                                                        PhoneNumber: regRequest.PhoneNumber
                                                     );
 
             var result = await userManager.CreateAsync(user, regRequest.Password);
@@ -80,7 +81,8 @@ namespace LonelyInterview.Application.Services
                                                         BirthDay: regRequest.BirthDay,
                                                         Email: regRequest.Email,
                                                         Telegram: regRequest.Telegram,
-                                                        Password: regRequest.Password
+                                                        Password: regRequest.Password,
+                                                        PhoneNumber: regRequest.PhoneNumber
                                                     );
 
             var result = await userManager.CreateAsync(user, regRequest.Password);

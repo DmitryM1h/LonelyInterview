@@ -15,9 +15,10 @@ public class ApplicationUser : IdentityUser<Guid>
 
 
     public static ApplicationUser CreateFromRegisterDto(string UserName, DateOnly? BirthDay,
-                    string Email, string? Telegram, string Password)
+                    string Email, string? Telegram, string Password, string PhoneNumber)
     {
-        if (string.IsNullOrWhiteSpace(UserName) || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+        if (string.IsNullOrWhiteSpace(UserName) || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password)
+            || string.IsNullOrWhiteSpace(PhoneNumber))
             throw new ArgumentNullException("Missing necessary fields");
 
         var user = new ApplicationUser
@@ -25,6 +26,7 @@ public class ApplicationUser : IdentityUser<Guid>
             Id = Guid.NewGuid(),
             UserName = UserName.Trim(),
             Email = Email.Trim().ToLower(),     
+            PhoneNumber = PhoneNumber.Trim().ToLower(), 
             
         };
 

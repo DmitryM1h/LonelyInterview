@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace LonelyInterview.Application.Requests.Auth;
 
+
 public record RegisterCandidateDto(string UserName, DateOnly? BirthDay, string? Specialty, string? Degree, int? GraduationYear,
-    string Email, string? Telegram, string? WorkExperience, string Password);
+    string Email, string? Telegram, string? WorkExperience, string Password, string PhoneNumber);
 
 
 public record RegisterCandidateResponse(string UserName, DateOnly? BirthDay, string? Specialty, string? Degree, int? GraduationYear,
-    string Email, string? Telegram, string? WorkExperience, string Password);
+    string Email, string? Telegram, string? WorkExperience, string Password, string PhoneNumber);
 

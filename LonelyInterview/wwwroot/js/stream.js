@@ -69,26 +69,33 @@ function initializeConnection() {
 function setupConnectionHandlers() {
     connection.onclose((error) => {
         console.log("Connection closed: ", error);
-        document.getElementById("connectionStatus").textContent = "Disconnected";
-        document.getElementById("connectionStatus").className = "disconnected";
-        setTimeout(startConnection, 5000);
+        // НЕ обновляем статус сразу, проверяем действительно ли отключено
+        setTimeout(() => {
+            if (connection.state === signalR.HubConnectionState.Disconnected) {
+                updateConnectionStatus("Disconnected", "disconnected");
+            }
+        }, 1000);
     });
 
     connection.onreconnecting((error) => {
         console.log("Reconnecting: ", error);
-        document.getElementById("connectionStatus").textContent = "Reconnecting...";
+        updateConnectionStatus("Reconnecting...", "reconnecting");
     });
 
     connection.onreconnected((connectionId) => {
         console.log("Reconnected: ", connectionId);
-        document.getElementById("connectionStatus").textContent = "Connected";
-        document.getElementById("connectionStatus").className = "connected";
+        updateConnectionStatus("Connected", "connected");
+    });
+
+    // ДОБАВИМ обработчик для ошибок вызовов методов
+    connection.on("ReceiveError", (error) => {
+        console.error("Server error:", error);
+        addChatMessage(`Server error: ${error}`, 'error-message');
     });
 
     // НОВЫЕ ОБРАБОТЧИКИ ДЛЯ ЧАТА
     connection.on("AudioProcessingDelay", (data) => {
         addChatMessage(`⚠️ ${data.Message}`, 'system-message');
-        addMessage(`Server warning: ${data.Message}`, 'info-message');
     });
 
     connection.on("CodeSubmitted", (data) => {
@@ -98,6 +105,21 @@ function setupConnectionHandlers() {
     connection.on("CodeError", (data) => {
         addChatMessage(`❌ Ошибка: ${data.Error}`, 'error-message');
     });
+
+    // ДОБАВИМ обработчик успешного начала аудиопотока
+    connection.on("AudioStreamStarted", (data) => {
+        console.log("✅ Audio stream started successfully:", data);
+        addChatMessage("Аудиопоток начал передаваться", 'system-message');
+    });
+}
+
+// НОВАЯ ФУНКЦИЯ для безопасного обновления статуса
+function updateConnectionStatus(text, className) {
+    const statusElement = document.getElementById("connectionStatus");
+    if (statusElement) {
+        statusElement.textContent = text;
+        statusElement.className = className;
+    }
 }
 
 // Функция логина
@@ -158,7 +180,7 @@ function logout() {
     }
 
     showLoginForm();
-    addMessage("Logged out successfully", 'info-message');
+    addChatMessage("Logged out successfully", 'info-message');
 }
 
 function startConnection() {
@@ -168,15 +190,17 @@ function startConnection() {
         try {
             yield connection.start();
             console.log("✅ Connected successfully to SignalR");
-            document.getElementById("connectionStatus").textContent = "Connected";
-            document.getElementById("connectionStatus").className = "connected";
+            updateConnectionStatus("Connected", "connected");
+
+            // ДОБАВИМ приветственное сообщение после успешного соединения
+            addChatMessage("Добро пожаловать! Введите ваш код в поле ниже и нажмите 'Отправить код' или Ctrl+Enter", 'system-message');
+
         } catch (err) {
             console.error("❌ Connection failed: ", err);
-            document.getElementById("connectionStatus").textContent = "Disconnected";
-            document.getElementById("connectionStatus").className = "disconnected";
+            updateConnectionStatus("Disconnected", "disconnected");
 
             if (err.statusCode === 401) {
-                addMessage("Authentication failed. Please login again.", 'error-message');
+                addChatMessage("Authentication failed. Please login again.", 'error-message');
                 logout();
             } else {
                 setTimeout(startConnection, 5000);
@@ -224,7 +248,7 @@ function initializeAudio() {
             return true;
         } catch (error) {
             console.error("Error initializing audio:", error);
-            addMessage(`Audio error: ${error.message}`, 'error-message');
+            addChatMessage(`Audio error: ${error.message}`, 'error-message');
             return false;
         }
     });
@@ -322,10 +346,13 @@ function addCodeMessage(code, type = 'code-message') {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Обработчик кнопки Start Recording - ВЫЗЫВАЕТ МЕТОД ХАБА
+// ОБНОВЛЕННЫЙ обработчик Start Recording
 document.getElementById("startRecording").addEventListener("click", (event) => __awaiter(this, void 0, void 0, function* () {
+    // ПРОВЕРЯЕМ реальное состояние соединения, а не только UI статус
     if (connection.state !== signalR.HubConnectionState.Connected) {
-        alert("Not connected to server");
+        const actualState = connection.state;
+        console.warn(`Cannot start recording - connection state: ${actualState}`);
+        addChatMessage(`Не могу начать запись. Статус соединения: ${actualState}`, 'error-message');
         return;
     }
 
@@ -336,8 +363,17 @@ document.getElementById("startRecording").addEventListener("click", (event) => _
         // Создаем Subject для потоковой передачи аудио
         audioSubject = new signalR.Subject();
 
-        // ВЫЗОВ МЕТОДА ХАБА StartAudioStream
-        yield connection.send("StartAudioStream", audioSubject);
+        console.log("🔄 Calling StartAudioStream method...");
+
+        // ВЫЗОВ МЕТОДА ХАБА StartAudioStream с обработкой ошибок
+        yield connection.send("StartAudioStream", audioSubject)
+            .then(() => {
+                console.log("✅ StartAudioStream method called successfully");
+            })
+            .catch(error => {
+                console.error("❌ StartAudioStream method failed:", error);
+                throw error;
+            });
 
         // Начинаем запись
         audioChunks = [];
@@ -352,12 +388,17 @@ document.getElementById("startRecording").addEventListener("click", (event) => _
         // Запускаем визуализацию
         visualizeAudio();
 
-        addMessage("Audio recording started...", 'info-message');
+        addChatMessage("Аудиозапись начата...", 'info-message');
         console.log("✅ Audio recording started and StartAudioStream method called");
 
     } catch (e) {
         console.error("❌ Error starting recording:", e);
-        addMessage(`Recording error: ${e.toString()}`, 'error-message');
+        addChatMessage(`Ошибка записи: ${e.toString()}`, 'error-message');
+
+        // Восстанавливаем UI при ошибке
+        document.getElementById("startRecording").disabled = false;
+        document.getElementById("stopRecording").disabled = true;
+        document.getElementById("startRecording").classList.remove("recording");
     }
     event.preventDefault();
 }));
@@ -385,12 +426,12 @@ document.getElementById("stopRecording").addEventListener("click", (event) => __
             document.getElementById("stopRecording").disabled = true;
             document.getElementById("startRecording").classList.remove("recording");
 
-            addMessage("Audio recording stopped", 'info-message');
+            addChatMessage("Audio recording stopped", 'info-message');
             console.log("Audio recording stopped");
         }
     } catch (e) {
         console.error("Error stopping recording:", e);
-        addMessage(`Stop recording error: ${e.toString()}`, 'error-message');
+        addChatMessage(`Stop recording error: ${e.toString()}`, 'error-message');
     }
     event.preventDefault();
 }));
@@ -406,7 +447,7 @@ document.getElementById("uploadButton").addEventListener("click", (event) => __a
         const subject = new signalR.Subject();
         connection.send("UploadStream", subject);
 
-        addMessage("Starting upload...", 'info-message');
+        addChatMessage("Starting upload...", 'info-message');
 
         let iteration = 0;
         const intervalHandle = setInterval(() => {
@@ -414,17 +455,17 @@ document.getElementById("uploadButton").addEventListener("click", (event) => __a
             const data = `Upload item ${iteration} at ${new Date().toLocaleTimeString()}`;
             subject.next(data);
 
-            addMessage(`Sent: ${data}`, 'client-message');
+            addChatMessage(`Sent: ${data}`, 'client-message');
 
             if (iteration === 5) {
                 clearInterval(intervalHandle);
                 subject.complete();
-                addMessage("Upload completed", 'info-message');
+                addChatMessage("Upload completed", 'info-message');
             }
         }, 1000);
     } catch (e) {
         console.error("Upload error:", e);
-        addMessage(`Upload error: ${e.toString()}`, 'error-message');
+        addChatMessage(`Upload error: ${e.toString()}`, 'error-message');
     }
     event.preventDefault();
 }));
@@ -480,6 +521,45 @@ document.getElementById("codeInput").addEventListener("keydown", (event) => {
     }
 });
 
+// ДОБАВИМ функцию для периодической проверки реального статуса соединения
+function startConnectionMonitor() {
+    setInterval(() => {
+        if (connection) {
+            const actualState = connection.state;
+            const displayedStatus = document.getElementById("connectionStatus").textContent;
+
+            // Если UI статус не соответствует реальному состоянию - исправляем
+            if ((actualState === signalR.HubConnectionState.Connected && displayedStatus !== "Connected") ||
+                (actualState === signalR.HubConnectionState.Connecting && displayedStatus !== "Reconnecting...") ||
+                (actualState === signalR.HubConnectionState.Disconnected && displayedStatus !== "Disconnected")) {
+
+                console.log(`🔄 Correcting UI status: ${displayedStatus} -> ${actualState}`);
+
+                switch (actualState) {
+                    case signalR.HubConnectionState.Connected:
+                        updateConnectionStatus("Connected", "connected");
+                        break;
+                    case signalR.HubConnectionState.Connecting:
+                    case signalR.HubConnectionState.Reconnecting:
+                        updateConnectionStatus("Reconnecting...", "reconnecting");
+                        break;
+                    case signalR.HubConnectionState.Disconnected:
+                        updateConnectionStatus("Disconnected", "disconnected");
+                        break;
+                }
+            }
+        }
+    }, 2000); // Проверяем каждые 2 секунды
+}
+
+// ДОБАВИМ логирование для отладки
+function logConnectionState() {
+    if (connection) {
+        console.log(`🔌 Current connection state: ${connection.state}`);
+        console.log(`📊 Connection ID: ${connection.connectionId}`);
+    }
+}
+
 // Обработчики событий
 document.addEventListener("DOMContentLoaded", () => {
     // Обработчик логина
@@ -495,6 +575,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         yield login(email, password);
+
+        // ЗАПУСКАЕМ мониторинг соединения после логина
+        if (connection) {
+            setTimeout(startConnectionMonitor, 1000);
+        }
     }));
 
     // Обработчик логаута
@@ -502,9 +587,6 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
         logout();
     });
-
-    // Добавляем приветственное сообщение в чат
-    addChatMessage("Добро пожаловать! Введите ваш код в поле ниже и нажмите 'Отправить код' или Ctrl+Enter", 'system-message');
 
     // Инициализация приложения
     initializeApp();

@@ -66,6 +66,7 @@ namespace LonelyInterview.Application.Interview
                 // Озвучка ????
 
                 string base64Audio = Convert.ToBase64String(reply);
+                Console.WriteLine("Ответ модели: " +  reply);
                 await Clients.Caller.SendAsync(base64Audio);
             }
         }

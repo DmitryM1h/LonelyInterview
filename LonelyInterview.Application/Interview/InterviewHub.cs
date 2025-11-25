@@ -9,13 +9,13 @@ using Microsoft.Extensions.Logging;
 namespace LonelyInterview.Application.Interview
 {
     [Authorize(Roles = nameof(Role.Candidate))]
-    public class InterviewHub(LLMClient client, ILogger<InterviewHub> _logger) : Hub
+    public class InterviewHub(LLMClientFactory clientFactory, ILogger<InterviewHub> _logger) : Hub
     {
         public async Task StartAudioStream(IAsyncEnumerable<byte[]> audioStream)
         {
             var connectionId = Context.UserIdentifier!;
 
-            client.SetConnection(connectionId, Context.ConnectionAborted);
+            var client = clientFactory.GetOrCreateSession(connectionId);
 
             try
             {
@@ -40,6 +40,7 @@ namespace LonelyInterview.Application.Interview
         public async Task SubmitCode(string code)
         {
             var connectionId = Context.UserIdentifier!;
+            var client = clientFactory.GetOrCreateSession(connectionId);
 
             try
             {
@@ -61,10 +62,12 @@ namespace LonelyInterview.Application.Interview
 
         public async Task ReceiveModelAnswers()
         {
+            var connectionId = Context.UserIdentifier!;
+
+            var client = clientFactory.GetOrCreateSession(connectionId);
+
             await foreach (var reply in client.GetModelReplies())
             {
-                // Озвучка ????
-
                 string base64Audio = Convert.ToBase64String(reply);
                 Console.WriteLine("Ответ модели: " +  reply);
                 await Clients.Caller.SendAsync(base64Audio);

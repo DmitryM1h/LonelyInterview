@@ -23,6 +23,7 @@ public class LLMClient : IAsyncDisposable
     {
         _client = client;
         _logger = logger;
+        _logger.LogInformation("LLMClient ctor worked out!!");
     }
 
     public IAsyncEnumerable<byte[]> GetModelReplies() => _modelReplies.Reader.ReadAllAsync();
@@ -31,6 +32,8 @@ public class LLMClient : IAsyncDisposable
     {
         _candidateId = userId;
         _ = RunBackground(token);
+        _logger.LogInformation("LLMClient set connection!!!!!!");
+
     }
 
     private Task RunBackground(CancellationToken token)
@@ -76,7 +79,7 @@ public class LLMClient : IAsyncDisposable
         {
             await foreach (var response in _currentCall.ResponseStream.ReadAllAsync(token))
             {
-                Console.WriteLine($"🔊 Received audio response from server for candidate: {response.CandidateId}");
+                //Console.WriteLine($"🔊 Received audio response from server for candidate: {response.CandidateId}");
                 byte[] audioBytes = response.AudioData.ToByteArray();
                 await _modelReplies.Writer.WriteAsync(audioBytes, token);
             }

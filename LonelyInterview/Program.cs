@@ -112,6 +112,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 
+
+#region SkipAuthMiddleWare
 // app.Use(async (ctx, next) =>
 // {
 //     var authEnabled = app.Configuration.GetValue<bool>("AuthOptions:Enabled");
@@ -146,7 +148,7 @@ app.UseAuthentication();
 //
 //     await next();
 // });
-
+#endregion
 
 
 app.UseAuthorization();

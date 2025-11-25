@@ -591,3 +591,33 @@ document.addEventListener("DOMContentLoaded", () => {
     // Инициализация приложения
     initializeApp();
 });
+
+// Обработчик для тестовой кнопки
+document.getElementById("testReceiveAnswers").addEventListener("click", (event) => __awaiter(this, void 0, void 0, function* () {
+    event.preventDefault();
+
+    if (connection.state !== signalR.HubConnectionState.Connected) {
+        addChatMessage("Нет соединения с сервером", 'error-message');
+        return;
+    }
+
+    try {
+        console.log("🔄 Calling ReceiveModelAnswers method...");
+        addChatMessage("Вызываю ReceiveModelAnswers...", 'system-message');
+
+        // ВЫЗОВ МЕТОДА ХАБА ReceiveModelAnswers
+        yield connection.invoke("ReceiveModelAnswers")
+            .then(() => {
+                console.log("✅ ReceiveModelAnswers method called successfully");
+                addChatMessage("ReceiveModelAnswers вызван успешно!", 'system-message');
+            })
+            .catch(error => {
+                console.error("❌ ReceiveModelAnswers method failed:", error);
+                addChatMessage(`Ошибка: ${error.toString()}`, 'error-message');
+            });
+
+    } catch (e) {
+        console.error("❌ Error calling ReceiveModelAnswers:", e);
+        addChatMessage(`Ошибка вызова: ${e.toString()}`, 'error-message');
+    }
+}));

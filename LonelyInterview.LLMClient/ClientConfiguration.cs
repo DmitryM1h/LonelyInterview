@@ -13,6 +13,7 @@ public static class ClientConfiguration
             options.Address = new Uri("http://localhost:50051");
         });
 
+        services.AddSingleton<LLMClientFactory>();
         services.AddScoped<LLMClient>();
     }
 

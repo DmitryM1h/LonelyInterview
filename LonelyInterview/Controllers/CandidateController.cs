@@ -1,6 +1,7 @@
-﻿using LonelyInterview.Auth.Contracts;
+﻿using LonelyInterview.Application.Requests.Candidate;
+using LonelyInterview.Auth.Contracts;
+using LonelyInterview.CodeExecution;
 using LonelyInterview.Domain.Models;
-using LonelyInterview.Application.Requests.Candidate;
 using LonelyInterview.Infrastructure.Data.DataSources;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -94,6 +95,15 @@ public class CandidateController(
         }).ToList());
 
 
+
+    }
+
+
+    [HttpGet("Code")]
+    public async Task<ActionResult> ExecuteCode([FromServices] Example codeService)
+    {
+        await codeService.CreateSubmission();
+        return Ok();
     }
 
    

@@ -7,8 +7,12 @@ using LonelyInterview.LLMIntegration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 
+using Judge0.DotNet;
+using LonelyInterview.CodeExecution;
+
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
@@ -71,6 +75,8 @@ builder.Services.Configure<AuthOptions>(
     builder.Configuration.GetSection("AuthOptions"));
 
 
+
+
 var identityBuilder = builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(opts =>
 {
     opts.Password.RequiredLength = 5;
@@ -87,6 +93,19 @@ builder.Services.AddAuth(builder.Configuration); // Добавляем посл�
 builder.Services.AddApplicationServices();
 
 builder.Services.AddLLMClient();
+
+//builder.Services.AddHttpClient<IJudge0Service, Judge0Service>(client =>
+//{
+//    client.BaseAddress = new Uri("http://localhost:2358");
+//    client.Timeout = TimeSpan.FromSeconds(30);
+//});
+
+//builder.Services.AddScoped<CodeExecutionService>();
+
+
+builder.Services.AddJudge0Dotnet(builder.Configuration);
+builder.Services.AddScoped<Example>();
+
 
 var app = builder.Build();
 

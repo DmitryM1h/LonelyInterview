@@ -1,11 +1,7 @@
 ﻿using LonelyInterviewAudioSession;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace LonelyInterview.LLMIntegration;
 
@@ -15,9 +11,9 @@ public class LLMClientFactory(IServiceProvider serviceProvider)
 
     public LLMClient GetOrCreateSession(string userId)
     {
-        var t = _sessions.TryGetValue(userId, out var session);
+        var sessionExists = _sessions.TryGetValue(userId, out var session);
 
-        if (t && session is not null)
+        if (sessionExists && session is not null)
             return session;
 
         var scope = serviceProvider.CreateScope();
@@ -27,6 +23,15 @@ public class LLMClientFactory(IServiceProvider serviceProvider)
         client.SetConnection(userId, CancellationToken.None);
         _sessions[userId] = client;
         return client;
+    }
+
+    public async Task CloseSession(string userId)
+    {
+        var sessionExists = _sessions.TryGetValue(userId, out var session);
+        if (sessionExists && session is not null)
+        {
+            await session.DisposeAsync();
+        }
     }
 
 }

@@ -11,6 +11,14 @@ namespace LonelyInterview.Application.Interview
     [Authorize(Roles = nameof(Role.Candidate))]
     public class InterviewHub(LLMClientFactory clientFactory, ILogger<InterviewHub> _logger) : Hub
     {
+        public override Task OnConnectedAsync()
+        {
+            var connectionId = Context.UserIdentifier!;
+            var client = clientFactory.GetOrCreateSession(connectionId);
+
+            return base.OnConnectedAsync();
+        }
+
         public async Task StartAudioStream(IAsyncEnumerable<byte[]> audioStream)
         {
             var connectionId = Context.UserIdentifier!;
@@ -72,6 +80,13 @@ namespace LonelyInterview.Application.Interview
                 Console.WriteLine("Ответ модели: " +  reply);
                 await Clients.Caller.SendAsync(base64Audio);
             }
+        }
+
+        public override Task OnDisconnectedAsync(Exception? exception)
+        {
+            var connectionId = Context.UserIdentifier!;
+            var client = clientFactory.CloseSession(connectionId);
+            return base.OnDisconnectedAsync(exception);
         }
 
 

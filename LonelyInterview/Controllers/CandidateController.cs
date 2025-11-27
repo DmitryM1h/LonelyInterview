@@ -18,6 +18,17 @@ public class CandidateController(
     ResumeDataSource _resumeDatasource) : ControllerBase
 {
 
+    private Guid CandidateId 
+    {
+        get
+        {
+            var id = HttpContext.User.Claims.Where(t => t.Type == ClaimTypes.NameIdentifier).First().Value;
+            return Guid.Parse(id);
+        }
+    }
+
+
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Candidate>>> GetAllCandidates()
     {
@@ -29,9 +40,8 @@ public class CandidateController(
     [Authorize(Roles = nameof(Role.Candidate))]
     public async Task<ActionResult> UpdateInfo([FromBody] UpdateCandidatesInfoRequest updRequest, CancellationToken token = default)
     {
-        var candidateId = HttpContext.User.Claims.First(t => t.Type == ClaimTypes.NameIdentifier).Value;
 
-        var candidate = await _candidateDatasource.GetCandidateWithInfo(Guid.Parse(candidateId), token);
+        var candidate = await _candidateDatasource.GetCandidateWithInfo(CandidateId, token);
 
         if (candidate == null)
             return BadRequest("Candidate was not found");
@@ -49,9 +59,8 @@ public class CandidateController(
     [Authorize(Roles = nameof(Role.Candidate))]
     public async Task<ActionResult> AddResume([FromBody] AddResumeRequest addResumeReq, [FromQuery] Guid vacancyId, CancellationToken token = default)
     {
-        var candidateId = HttpContext.User.Claims.Where(t => t.Type == ClaimTypes.NameIdentifier).First().Value;
 
-        var candidate = await _candidateDatasource.GetByIdOrDefaultAsync(Guid.Parse(candidateId), token);
+        var candidate = await _candidateDatasource.GetByIdOrDefaultAsync(CandidateId, token);
 
         if (candidate == null)
             return Forbid();
@@ -77,12 +86,8 @@ public class CandidateController(
     [Authorize(Roles = nameof(Role.Candidate))]
     public async Task<ActionResult> GetCandidatesResumes(CancellationToken token = default)
     {
-        var candidateId = HttpContext.User.Claims.Where(t => t.Type == ClaimTypes.NameIdentifier).First().Value;
-
-        if (candidateId is null)
-            return Forbid();
-
-        var resumes = await _resumeDatasource.GetByCandidateIdWithVacancyInfoAsync(Guid.Parse(candidateId), token);
+ 
+        var resumes = await _resumeDatasource.GetByCandidateIdWithVacancyInfoAsync(CandidateId, token);
 
         return Ok(resumes.Select(t => new 
         { t.Vacancy.Title,
@@ -94,8 +99,15 @@ public class CandidateController(
           t.PassiveSkills 
         }).ToList());
 
+    }
 
+    [HttpGet("AppliedVacancies")]
+    public async Task<ActionResult> GetAppliedVacancies(CancellationToken token = default)
+    {
 
+        var resumes = await _candidateDatasource.GetAppliedResumesWithVacancyAsync(CandidateId, token);
+
+        return Ok(resumes.Select(t => new { t.Vacancy.Title, t.Vacancy.Description}));
     }
 
 

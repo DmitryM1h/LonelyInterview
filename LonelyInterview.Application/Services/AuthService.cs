@@ -44,7 +44,6 @@ namespace LonelyInterview.Application.Services
 
         public async Task<Result> RegisterCandidateAsync(RegisterCandidateDto regRequest, CancellationToken token)
         {
-            //TODO Транзакция
             var user = ApplicationUser.CreateFromRegisterDto(
                                                         UserName: regRequest.UserName,
                                                         BirthDay: regRequest.BirthDay,
@@ -73,7 +72,6 @@ namespace LonelyInterview.Application.Services
 
         public async Task<Result> RegisterHrManagerAsync(RegisterHrDto regRequest, CancellationToken token)
         {
-            //TODO Транзакция
             var user = ApplicationUser.CreateFromRegisterDto(
                                                         UserName: regRequest.UserName,
                                                         BirthDay: regRequest.BirthDay,

@@ -11,8 +11,7 @@ namespace LonelyInterview.Auth
     {
         public static void AddAuth(this IServiceCollection services, IConfiguration configuration)
         {
-            //var serviceProvider = services.BuildServiceProvider();
-            //var jwtOptions = serviceProvider.GetRequiredService<IOptions<AuthOptions>>().Value;
+     
             var authOptions = configuration.GetSection("AuthOptions").Get<AuthOptions>();
 
 
@@ -23,15 +22,6 @@ namespace LonelyInterview.Auth
             })
                 .AddJwtBearer(options =>
                 {
-                    //options.Events = new JwtBearerEvents()
-                    //{
-                    //    OnMessageReceived = context =>
-                    //    {
-                    //        context.Token = context.Request.Cookies["JWT"];
-                    //        return Task.CompletedTask;
-                    //    }
-                    //};
-
                     options.Events = new JwtBearerEvents
                     {
                         OnTokenValidated = context =>

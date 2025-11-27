@@ -88,7 +88,6 @@ public class Vacancy : IEntity
             Description = description.Trim(),
             RequiredSkills = requiredSkills.Trim(),
             Location = location.Trim(),
-          //  ResponsibleHr = responsibleHr,
             ShortDescription = string.IsNullOrWhiteSpace(shortDescription) ? null : shortDescription.Trim(),
             NiceToHaveSkills = string.IsNullOrWhiteSpace(niceToHaveSkills) ? null : niceToHaveSkills.Trim(),
             MinYearsOfExperience = minYearsOfExperience,

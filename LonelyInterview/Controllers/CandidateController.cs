@@ -100,7 +100,7 @@ public class CandidateController(
 
 
     [HttpGet("Code")]
-    public async Task<ActionResult> ExecuteCode([FromServices] Example codeService)
+    public async Task<ActionResult> ExecuteCode([FromServices] CodeExecutionService codeService)
     {
         await codeService.CreateSubmission();
         return Ok();

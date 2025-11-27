@@ -104,7 +104,7 @@ builder.Services.AddLLMClient();
 
 
 builder.Services.AddJudge0Dotnet(builder.Configuration);
-builder.Services.AddScoped<Example>();
+builder.Services.AddScoped<CodeExecutionService>();
 
 
 var app = builder.Build();

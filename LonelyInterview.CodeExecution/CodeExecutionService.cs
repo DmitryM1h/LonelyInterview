@@ -4,11 +4,11 @@ using Judge0.DotNet.Models.Submissions;
 
 namespace LonelyInterview.CodeExecution
 {
-    public class Example
+    public class CodeExecutionService
     {
         private readonly ISubmissionService _submissionService;
 
-        public Example(ISubmissionService submissionService)
+        public CodeExecutionService(ISubmissionService submissionService)
         {
             _submissionService = submissionService;
         }

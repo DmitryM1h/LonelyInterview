@@ -14,7 +14,7 @@ namespace LonelyInterview.Controllers
                                ) : ControllerBase
     {
         [HttpPost("CreateRole")]
-       // [Authorize(Roles = nameof(Role.Administrator))]
+        [Authorize(Roles = nameof(Role.Administrator))]
         public async Task<IActionResult> CreateRole(string roleName)
         {
             if (!Enum.TryParse<Role>(roleName, out _))
@@ -29,7 +29,7 @@ namespace LonelyInterview.Controllers
 
 
         [HttpPost("AddToRole")]
-       // [Authorize(Roles = nameof(Role.Administrator)]
+        [Authorize(Roles = nameof(Role.Administrator)]
         public async Task<IActionResult> AddToRole([FromQuery]string email,[FromQuery] string roleName)
         {
             if (!Enum.TryParse<Role>(roleName, true, out Role role))
@@ -51,6 +51,7 @@ namespace LonelyInterview.Controllers
 
 
         [HttpGet("Claims")]
+        [Authorize]
         public ActionResult<IEnumerable<Claim>> CheckClaims()
         {
             var userClaims = HttpContext.User.Claims.Select(t => t.Value).ToList();
@@ -59,6 +60,7 @@ namespace LonelyInterview.Controllers
         }
 
         [HttpGet("AssertRole")]
+        [Authorize]
         public ActionResult<bool> AssertRole(string Role)
         {
 

@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LonelyInterview.Auth", "Lon
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LonelyInterview.Application", "LonelyInterview.Application\LonelyInterview.Application.csproj", "{21BE0D9E-B22C-4EE9-8903-E711C58FEA88}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LonelyInterview.LLMIntegration", "LonelyInterview.LLMClient\LonelyInterview.LLMIntegration.csproj", "{F1C3D13F-55A5-4695-8676-72B738CA6F7A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LonelyInterview.LLMIntegration", "LonelyInterview.LLMIntegration\LonelyInterview.LLMIntegration.csproj", "{F1C3D13F-55A5-4695-8676-72B738CA6F7A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LonelyInterview.CodeExecution", "LonelyInterview.CodeExecution\LonelyInterview.CodeExecution.csproj", "{CB245AB6-7777-40B5-9A90-88F717F765CA}"
 EndProject

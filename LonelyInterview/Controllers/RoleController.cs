@@ -29,7 +29,7 @@ namespace LonelyInterview.Controllers
 
 
         [HttpPost("AddToRole")]
-        [Authorize(Roles = nameof(Role.Administrator)]
+        [Authorize(Roles = nameof(Role.Administrator))]
         public async Task<IActionResult> AddToRole([FromQuery]string email,[FromQuery] string roleName)
         {
             if (!Enum.TryParse<Role>(roleName, true, out Role role))

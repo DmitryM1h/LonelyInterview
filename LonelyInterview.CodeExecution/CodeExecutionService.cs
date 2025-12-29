@@ -13,6 +13,8 @@ namespace LonelyInterview.CodeExecution
             _submissionService = submissionService;
         }
 
+
+        [Obsolete("Не доделано")]
         public async Task CreateSubmission()
         {
             var submission = new Submission(

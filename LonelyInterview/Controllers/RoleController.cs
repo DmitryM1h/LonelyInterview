@@ -1,5 +1,5 @@
 ﻿using LonelyInterview.Auth;
-using LonelyInterview.Auth.Contracts;
+using LonelyInterview.Auth.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +20,7 @@ namespace LonelyInterview.Controllers
             if (!Enum.TryParse<Role>(roleName, out _))
                 return BadRequest("Invalid role");
 
-            if (!await roleManager.RoleExistsAsync(roleName))
+            if (await roleManager.RoleExistsAsync(roleName))
                 return Ok();
 
             await roleManager.CreateAsync(new IdentityRole<Guid>(roleName));
